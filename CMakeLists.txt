@@ -1,15 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(whycon_ros)
+project(whycon)
 
 find_package(catkin REQUIRED COMPONENTS
     roscpp
     image_transport
-    std_msgs
     geometry_msgs
     visualization_msgs
     message_generation
     dynamic_reconfigure
-    cv_bridge
     tf
     )
 
@@ -59,7 +57,7 @@ catkin_package(
     #  INCLUDE_DIRS include
     #  LIBRARIES charging
     #  CATKIN_DEPENDS image_transport roscpp rospy std_msgs
-    CATKIN_DEPENDS roscpp image_transport message_runtime std_msgs geometry_msgs visualization_msgs dynamic_reconfigure cv_bridge tf
+    CATKIN_DEPENDS roscpp image_transport message_runtime geometry_msgs visualization_msgs dynamic_reconfigure tf
     #  DEPENDS system_lib
     )
 
@@ -72,23 +70,7 @@ include_directories(
     ${catkin_INCLUDE_DIRS}
     )
 
-#add_library(whycon_detector src/whycon/CCircleDetect.cpp)
-#add_library(whycon_image src/whycon/CRawImage.cpp)
-#add_library(whycon_timer src/whycon/CTimer.cpp)
-#add_library(whycon_sysmath src/whycon/sysmat.cpp)
-#add_library(whycon_transform src/whycon/CTransformation.cpp)
-#add_library(whycon_necklace src/whycon/CNecklace.cpp)
-
-#target_link_libraries(whycon_image ${OpenCV_LIBRARIES})
-#target_link_libraries(whycon_detector whycon_image)
-#target_link_libraries(whycon_transform whycon_sysmath ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-#target_link_libraries(whycon_necklace whycon_detector whycon_transform whycon_image)
-
-#add_library(whycon_ros src/whycon/CWhycon.cpp)
-#add_dependencies(whycon_ros ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
-#target_link_libraries(whycon_ros whycon_timer whycon_image whycon_detector whycon_transform whycon_necklace ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-
-add_executable(whycon_ros
+add_executable(whycon
     src/whycon_ros/whycon_ros_node.cpp
     src/whycon/CWhycon.cpp
     src/whycon/CCircleDetect.cpp
@@ -98,21 +80,16 @@ add_executable(whycon_ros
     src/whycon/CTransformation.cpp
     src/whycon/CNecklace.cpp
     )
-target_link_libraries(whycon_ros ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
-add_dependencies(whycon_ros ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+
+target_link_libraries(whycon ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
+add_dependencies(whycon ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
 
 #############
 ## Install ##
 #############
 
 # install(TARGETS
-#     whycon_detector
-#     whycon_image
-#     whycon_timer
-#     whycon_sysmath
-#     whycon_transform
-#     whycon_necklace
-#     whycon_ros
+#     whycon
 #     ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #     LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #     RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

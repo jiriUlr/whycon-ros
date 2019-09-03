@@ -12,15 +12,15 @@
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 
-#include "whycon_ros/whyconConfig.h"
-#include "whycon_ros/MarkerArray.h"
-#include "whycon_ros/Marker.h"
+#include "whycon/whyconConfig.h"
+#include "whycon/MarkerArray.h"
+#include "whycon/Marker.h"
 
-#include "whycon_ros/SelectMarker.h"
-#include "whycon_ros/SetCalibMethod.h"
-#include "whycon_ros/SetCalibPath.h"
-#include "whycon_ros/SetCoords.h"
-#include "whycon_ros/SetDrawing.h"
+#include "whycon/SelectMarker.h"
+#include "whycon/SetCalibMethod.h"
+#include "whycon/SetCalibPath.h"
+#include "whycon/SetCoords.h"
+#include "whycon/SetDrawing.h"
 
 #include "whycon/whycon.h"
 
@@ -32,17 +32,17 @@ class CWhyconROSNode
 {
 
     public:
-        bool setDrawingCallback(whycon_ros::SetDrawing::Request& req, whycon_ros::SetDrawing::Response& res);
+        bool setDrawingCallback(whycon::SetDrawing::Request& req, whycon::SetDrawing::Response& res);
 
-        bool setCoordsCallback(whycon_ros::SetCoords::Request& req, whycon_ros::SetCoords::Response& res);
+        bool setCoordsCallback(whycon::SetCoords::Request& req, whycon::SetCoords::Response& res);
 
-        bool setCalibMethodCallback(whycon_ros::SetCalibMethod::Request& req, whycon_ros::SetCalibMethod::Response& res);
+        bool setCalibMethodCallback(whycon::SetCalibMethod::Request& req, whycon::SetCalibMethod::Response& res);
 
-        bool setCalibPathCallback(whycon_ros::SetCalibPath::Request& req, whycon_ros::SetCalibPath::Response& res);
+        bool setCalibPathCallback(whycon::SetCalibPath::Request& req, whycon::SetCalibPath::Response& res);
 
-        bool selectMarkerCallback(whycon_ros::SelectMarker::Request& req, whycon_ros::SelectMarker::Response& res);
+        bool selectMarkerCallback(whycon::SelectMarker::Request& req, whycon::SelectMarker::Response& res);
 
-        void reconfigureCallback(whycon_ros::whyconConfig& config, uint32_t level);
+        void reconfigureCallback(whycon::whyconConfig& config, uint32_t level);
 
         void cameraInfoCallback(const sensor_msgs::CameraInfoConstPtr& msg);
 

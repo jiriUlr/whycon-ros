@@ -5,14 +5,14 @@
 namespace whycon_ros
 {
 
-bool CWhyconROSNode::setDrawingCallback(whycon_ros::SetDrawing::Request& req, whycon_ros::SetDrawing::Response& res)
+bool CWhyconROSNode::setDrawingCallback(whycon::SetDrawing::Request& req, whycon::SetDrawing::Response& res)
 {
     whycon_.setDrawing(req.draw_coords, req.draw_segments);
     res.success = true;
     return true;
 }
 
-bool CWhyconROSNode::setCoordsCallback(whycon_ros::SetCoords::Request& req, whycon_ros::SetCoords::Response& res)
+bool CWhyconROSNode::setCoordsCallback(whycon::SetCoords::Request& req, whycon::SetCoords::Response& res)
 {
     try
     {
@@ -27,7 +27,7 @@ bool CWhyconROSNode::setCoordsCallback(whycon_ros::SetCoords::Request& req, whyc
     return true;
 }
 
-bool CWhyconROSNode::setCalibMethodCallback(whycon_ros::SetCalibMethod::Request& req, whycon_ros::SetCalibMethod::Response& res)
+bool CWhyconROSNode::setCalibMethodCallback(whycon::SetCalibMethod::Request& req, whycon::SetCalibMethod::Response& res)
 {
     try
     {
@@ -55,7 +55,7 @@ bool CWhyconROSNode::setCalibMethodCallback(whycon_ros::SetCalibMethod::Request&
     return true;
 }
 
-bool CWhyconROSNode::setCalibPathCallback(whycon_ros::SetCalibPath::Request& req, whycon_ros::SetCalibPath::Response& res)
+bool CWhyconROSNode::setCalibPathCallback(whycon::SetCalibPath::Request& req, whycon::SetCalibPath::Response& res)
 {
     try
     {
@@ -83,13 +83,13 @@ bool CWhyconROSNode::setCalibPathCallback(whycon_ros::SetCalibPath::Request& req
     return true;
 }
 
-bool CWhyconROSNode::selectMarkerCallback(whycon_ros::SelectMarker::Request& req, whycon_ros::SelectMarker::Response& res)
+bool CWhyconROSNode::selectMarkerCallback(whycon::SelectMarker::Request& req, whycon::SelectMarker::Response& res)
 {
     whycon_.selectMarker(req.point.x, req.point.y);
     return true;
 }
 
-void CWhyconROSNode::reconfigureCallback(whycon_ros::whyconConfig& config, uint32_t level)
+void CWhyconROSNode::reconfigureCallback(whycon::whyconConfig& config, uint32_t level)
 {
     ROS_INFO("[Reconfigure Request]\n"
         "identify %s circleDiameter %lf numMarkers %d\n"
@@ -137,12 +137,12 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
     whycon_.processImage(image_, whycon_detections_);
 
     // Generate information about markers into msgs
-    whycon_ros::MarkerArray marker_array;
+    whycon::MarkerArray marker_array;
     marker_array.header = msg->header;
 
     for(const whycon::SMarker& detection : whycon_detections_)
     {
-        whycon_ros::Marker marker;
+        whycon::Marker marker;
 
         marker.id = detection.seg.ID;
         marker.size = detection.seg.size;
@@ -175,7 +175,7 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
 
     if(publish_visual_)
     {
-        for(whycon_ros::Marker marker : marker_array.markers)
+        for(whycon::Marker marker : marker_array.markers)
         {
             visualization_msgs::Marker visual_marker;
             visual_marker.header = msg->header;
@@ -254,7 +254,7 @@ CWhyconROSNode::CWhyconROSNode()
     
     // advertise topics with markers description, RVIZ visualization and GUI visualization
     img_pub_ = it.advertise("processed_image", 1);
-    markers_pub_ = nh.advertise<whycon_ros::MarkerArray>("markers", 1);
+    markers_pub_ = nh.advertise<whycon::MarkerArray>("markers", 1);
     visual_pub_ = nh.advertise<visualization_msgs::MarkerArray>("visualisation", 1);
 
     // advertise services
@@ -265,8 +265,8 @@ CWhyconROSNode::CWhyconROSNode()
     select_marker_srv_ = nh.advertiseService("select_marker", &CWhyconROSNode::selectMarkerCallback, this);
 
     // create dynamic reconfigure server
-    dynamic_reconfigure::Server<whycon_ros::whyconConfig> dyn_srv;
-    dynamic_reconfigure::Server<whycon_ros::whyconConfig>::CallbackType dyn_srv_cb;
+    dynamic_reconfigure::Server<whycon::whyconConfig> dyn_srv;
+    dynamic_reconfigure::Server<whycon::whyconConfig>::CallbackType dyn_srv_cb;
     dyn_srv_cb = boost::bind(&CWhyconROSNode::reconfigureCallback, this, _1, _2);
     dyn_srv.setCallback(dyn_srv_cb);
 }
@@ -280,7 +280,7 @@ CWhyconROSNode::~CWhyconROSNode()
 
 int main(int argc, char *argv[])
 {
-    ros::init(argc, argv, "whycon_ros");
+    ros::init(argc, argv, "whycon");
 
     whycon_ros::CWhyconROSNode whycon_ros_node;
     whycon_ros_node.start();
