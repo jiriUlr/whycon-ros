@@ -1,0 +1,32 @@
+#07: CCircleDetect.h
+    ... #define COLOR_PRECISION 32 ... check the meaning & document it
+#13: CCircleDetect.cpp - normalizeAngle()
+    rather use https://stackoverflow.com/questions/11498169/dealing-with-angle-wrap-in-c-code
+    double constrainAngle(double x){
+        x = fmod(x + 180,360);
+        if (x < 0)
+            x += 360;
+        return x - 180;
+    }
+    than using two while cycles
+
+#08: CWhycon.cpp - imageCallback()
+    ... gui->drawStats ... // proper agruments and adjust the function in CGui to fit a new struct
+
+#09: CTransformation.cpp - transform()
+    ... result = calcEigne(data) ... // is it really necessary if we then overwrite return values?
+#10: CTransformation.cpp - transform()
+    ... result.yaw ... // why calculating twice?
+#11: CTransformation.cpp - transform()
+    ... result.yaw = segment.angle // why rewriting the value? have to find out in the article
+#20: CTransformation.cpp
+    check whether still needed and if yes, use opencv if possible
+#25: CTransformation.cpp - saveCalibration()
+    revise the format of calibration file
+
+#17: CGui.cpp - drawStats()
+    rewrite to take SMarker instead of STrackedObject
+#18: CGui.cpp - saveScreen()
+    adjust saving path
+#19: CGui.cpp
+    ... #define THICK_CROSS ... // why to use and document the functionality
