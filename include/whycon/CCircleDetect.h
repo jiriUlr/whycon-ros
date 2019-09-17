@@ -110,7 +110,8 @@ class CCircleDetect {
         float idy[MAX_PATTERNS];
         int numberIDs;
 
-        STrackedObject trackedObject;
+        SEllipseCenters ellipse_centers;
+        STrackedObject tracked_object;
 };
 
 }

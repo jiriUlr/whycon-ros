@@ -45,31 +45,31 @@ typedef enum
 
 typedef struct
 {
-    float x,y,z,d;          // position and distance from the camera
-    float pitch,roll,yaw;   // angles - precision is unknown
-
-    float segX1,segY1;
-    float x1,y1,z1,d1;
-    float pitch1,roll1,yaw1;
-
-    float segX2,segY2;
-    float x2,y2,z2,d2;
-    float pitch2,roll2,yaw2;
-    
-    float roundness;        // segment roundness as calculated by 5 of [1]
-    float bwratio;          // black/white area ratio
-    int ID;                 // ID of marker
-
-    float angle;
-    float n0, n1, n2;
-    float qx, qy, qz, qw;
-    float theta, phi, psi;
+    float u, v;                 // real center in the image coords
+    float x, y, z, d;           // position and distance in the camera coords
+    float roll, pitch, yaw;     // fixed axis angles
+    float angle;                // axis angle around marker's surface normal
+    float n0, n1, n2;           // marker surface normal pointing the camera
+    float qx, qy, qz, qw;       // quaternion
+    // ??? not used float roundness;            // segment roundness as calculated by 5 of [1]
+    // ??? not used float bwratio;              // black/white area ratio
+    // ??? not used int ID;                     // ID of marker
 } STrackedObject;
+
+typedef struct
+{
+    float u[2];     // retransformed x coords
+    float v[2];     // retransformed y coords
+    float n[2][3];  // both solutions of marker's surface normal
+    float t[2][3];  // both solutions of position vector
+} SEllipseCenters;
 
 // rotation/translation model of the 3D transformation                                                                                                                  
 typedef struct
 {
-    STrackedObject orig;    // translation vector
+    float orig_x;           // translation x
+    float orig_y;           // translation y
+    float orig_z;           // translation z
     float simlar[3][3];     // rotation description
 } S3DTransform;
 

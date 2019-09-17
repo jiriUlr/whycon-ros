@@ -1,3 +1,4 @@
+#include <cstdio>
 #include "whycon/CCircleDetect.h"
 
 #define min(a,b) ((a) < (b) ? (a) : (b))
@@ -505,25 +506,29 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
     }
     else if (numFailed < maxFailed)
     {
-        if (numFailed++ % 2 == 0) changeThreshold();
-        else threshold = lastThreshold;
+        if (numFailed++ % 2 == 0)
+            changeThreshold();
+        else
+            threshold = lastThreshold;
     }
     else
     {
         numFailed++;
-        if (changeThreshold() == false) numFailed = 0;
+        if (changeThreshold() == false)
+            numFailed = 0;
     }
 
     // analyze and calculate binary code, resolve ambiguity, process tranformations
-    if (outer.valid && false)
+    if (outer.valid)
     {
-        trackedObject = trans_->transform(outer);
+        ellipse_centers = trans_->calcSolutions(outer);
         
-        if(identify) ambiguityAndObtainCode(image);
-        else ambiguityPlain();
+        if(identify)
+            ambiguityAndObtainCode(image);
+        else
+            ambiguityPlain();
 
-        trans_->calcQuaternion(&trackedObject);
-        trans_->calcEulerFromQuat(&trackedObject);
+        trans_->transformAndAngles(tracked_object);
     }
 
     // drawing results 
@@ -532,9 +537,12 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
         for (int p = queueOldStart; p < queueEnd; p++)
         {
             pos = queue[p];
-            image->data_[step * pos + 0] = image->data_[step * pos + 1] = image->data_[step * pos + 2] = 0;
+            image->data_[step * pos + 0] = 0;
+            image->data_[step * pos + 1] = 0;
+            image->data_[step * pos + 2] = 0;
         }
     }
+
     if (draw_)
     {
         if (init.valid || track || lastTrackOK)
@@ -567,12 +575,14 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
         }
     }
 
+    std::printf("%.3f %.3f %.3f %.3f %.3f %.3f\n", tracked_object.x, tracked_object.y, tracked_object.z, tracked_object.n0, tracked_object.n1, tracked_object.n2);
+
     bufferCleanup(outer);
 
     SMarker output;
     output.valid = outer.valid;
     output.seg = outer;
-    output.obj = trackedObject;
+    output.obj = tracked_object;
 
     return output;
 }
@@ -582,15 +592,15 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
     int segIdx = 0;
 
     SSegSmall tmp[2];
-    tmp[0].x = trackedObject.segX1;
-    tmp[0].y = trackedObject.segY1;
+    tmp[0].x = ellipse_centers.u[0];
+    tmp[0].y = ellipse_centers.v[0];
     tmp[0].m0 = 0.33 / 0.70 * outer.m0;
     tmp[0].m1 = 0.33 / 0.70 * outer.m1;
     tmp[0].v0 = outer.v0;
     tmp[0].v1 = outer.v1;
 
-    tmp[1].x = trackedObject.segX2;
-    tmp[1].y = trackedObject.segY2;
+    tmp[1].x = ellipse_centers.u[1];
+    tmp[1].y = ellipse_centers.v[1];
     tmp[1].m0 = 0.33 / 0.70 * outer.m0;
     tmp[1].m1 = 0.33 / 0.70 * outer.m1;
     tmp[1].v0 = outer.v0;
@@ -613,7 +623,8 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
 
     char code[2][idBits * 4];
     
-    for(int i = 0; i < 2; i++){
+    for(int i = 0; i < 2; i++)
+    {
         //calculate appropriate positions
         float topY = 0;
         int topIndex = 0;
@@ -643,12 +654,15 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
 
         //binarize the signal
         float avg = 0;
-        for (int a = 0; a < idSamples; a++) avg += signal[i][a];
+        for (int a = 0; a < idSamples; a++)
+            avg += signal[i][a];
         avg = avg / idSamples;
         for (int a = 0;a<idSamples;a++)
         {
-            if (signal[i][a] > avg) smooth[i][a] = 1;
-            else smooth[i][a] = 0;
+            if (signal[i][a] > avg)
+                smooth[i][a] = 1;
+            else
+                smooth[i][a] = 0;
         }
 
         //find the edge's locations
@@ -657,7 +671,8 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         float sx, sy;
         sx = sy = 0;
         numPoints[i] = 0;
-        if (smooth[i][idSamples - 1] != smooth[i][0]) sx = 1;
+        if (smooth[i][idSamples - 1] != smooth[i][0])
+            sx = 1;
         for (int a = 1; a < idSamples; a++)
         {
             if (smooth[i][a] != smooth[i][a - 1])
@@ -665,17 +680,20 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
                 sx += cos(2 * M_PI * a / segmentWidth);
                 sy += sin(2 * M_PI * a / segmentWidth);
                 numPoints[i]++;
-                if (debug) printf("%i ", a);
+                if (debug)
+                    printf("%i ", a);
             }
         }
-        if (debug) printf("\n");
+        if (debug)
+            printf("\n");
         maxIdx[i] = atan2(sy, sx) / 2 / M_PI * segmentWidth + segmentWidth / 2;
 
         float meanX = sx / numPoints[i];
         float meanY = sy / numPoints[i];
         float errX, errY;
         sx = sy = 0;
-        if (smooth[i][idSamples - 1] != smooth[i][0]) sx = 1;
+        if (smooth[i][idSamples - 1] != smooth[i][0])
+            sx = 1;
         for (int a = 1; a < idSamples; a++)
         {
             if (smooth[i][a] != smooth[i][a - 1])
@@ -690,53 +708,39 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         variance[i] = sum[i] / numPoints[i];
 
         //determine raw code
-        for (int a = 0; a < idBits * 2; a++) code[i][a] = smooth[i][(maxIdx[i] + a * segmentWidth) % idSamples] + '0';
+        for (int a = 0; a < idBits * 2; a++)
+            code[i][a] = smooth[i][(maxIdx[i] + a * segmentWidth) % idSamples] + '0';
 
         code[i][idBits*2] = 0;
     }
 
-    if(variance[0] < variance[1]) segIdx = 0;
-    else segIdx = 1;
-
-    if(segIdx == 0)
-    {
-        outer.x = trackedObject.segX1;
-        outer.y = trackedObject.segY1;
-        trackedObject.x = trackedObject.x1;
-        trackedObject.y = trackedObject.y1;
-        trackedObject.z = trackedObject.z1;
-        trackedObject.pitch = trackedObject.pitch1;
-        trackedObject.roll = trackedObject.roll1;
-        trackedObject.yaw = trackedObject.yaw1;
-    }
+    if(variance[0] < variance[1])
+        segIdx = 0;
     else
-    {
-        outer.x = trackedObject.segX2;
-        outer.y = trackedObject.segY2;
-        trackedObject.x = trackedObject.x2;
-        trackedObject.y = trackedObject.y2;
-        trackedObject.z = trackedObject.z2;
-        trackedObject.pitch = trackedObject.pitch2;
-        trackedObject.roll = trackedObject.roll2;
-        trackedObject.yaw = trackedObject.yaw2;
-    }
-    trackedObject.n0 = trackedObject.pitch;
-    trackedObject.n1 = trackedObject.roll;
-    trackedObject.n2 = trackedObject.yaw;
+        segIdx = 1;
+
+    tracked_object.u = ellipse_centers.u[segIdx];
+    tracked_object.v = ellipse_centers.v[segIdx];
+    tracked_object.x = ellipse_centers.t[segIdx][0];
+    tracked_object.y = ellipse_centers.t[segIdx][1];
+    tracked_object.z = ellipse_centers.t[segIdx][2];
+    tracked_object.n0 = ellipse_centers.n[segIdx][0];
+    tracked_object.n1 = ellipse_centers.n[segIdx][1];
+    tracked_object.n2 = ellipse_centers.n[segIdx][2];
 
     maxIndex = maxIdx[segIdx];
 
     //char realCode[idBits*4];
     char realCode[idBits + 1];
 
-    SDecoded segDecoded = decoder_->decode(code[segIdx], realCode, maxIndex, outer.v0, outer.v1);
-    outer.ID = segDecoded.id + 1;
-    trackedObject.angle = segDecoded.angle;
+    SDecoded segment_decode = decoder_->decode(code[segIdx], realCode, maxIndex, outer.v0, outer.v1);
+    outer.ID = segment_decode.id + 1;
+    tracked_object.angle = segment_decode.angle;
 
     if (debug)
     {
-        printf("CODE %i %i %.3f\n", segDecoded.id, maxIndex, segDecoded.angle);
-        printf("Realcode %s %i %s\n", code[segIdx], segDecoded.edgeIndex, realCode);
+        printf("CODE %i %i %.3f\n", segment_decode.id, maxIndex, segment_decode.angle);
+        printf("Realcode %s %i %s\n", code[segIdx], segment_decode.edgeIndex, realCode);
         printf("ORIG signal: ");
         for (int a = 0; a < idSamples; a++) printf("%.2f ", signal[segIdx][a]);
         printf("\nsmooth: ");
@@ -759,40 +763,32 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
 void CCircleDetect::ambiguityPlain()
 {
     // distance from inner center because it's relatively invariant
-    float dist1 = sqrt((inner.x-trackedObject.segX1)*(inner.x-trackedObject.segX1)+(inner.y-trackedObject.segY1)*(inner.y-trackedObject.segY1));
-    float dist2 = sqrt((inner.x-trackedObject.segX2)*(inner.x-trackedObject.segX2)+(inner.y-trackedObject.segY2)*(inner.y-trackedObject.segY2));
+    float dist0 = std::sqrt((inner.x - ellipse_centers.u[0]) * (inner.x - ellipse_centers.u[0]) +
+                            (inner.y - ellipse_centers.v[0]) * (inner.y - ellipse_centers.v[1]));
+
+    float dist1 = std::sqrt((inner.x - ellipse_centers.u[1]) * (inner.x - ellipse_centers.u[1]) +
+                            (inner.y - ellipse_centers.v[1]) * (inner.y - ellipse_centers.v[1]));
     
-    if(dist1 < dist2)
-    {
-        outer.x = trackedObject.segX1;
-        outer.y = trackedObject.segY1;
-        trackedObject.x = trackedObject.x1;
-        trackedObject.y = trackedObject.y1;
-        trackedObject.z = trackedObject.z1;
-        trackedObject.pitch = trackedObject.pitch1;
-        trackedObject.roll = trackedObject.roll1;
-        trackedObject.yaw = trackedObject.yaw1;
-    }
+    int idx;
+    if(dist0 < dist1)
+        idx = 0;
     else
-    {
-        outer.x = trackedObject.segX2;
-        outer.y = trackedObject.segY2;
-        trackedObject.x = trackedObject.x2;
-        trackedObject.y = trackedObject.y2;
-        trackedObject.z = trackedObject.z2;
-        trackedObject.pitch = trackedObject.pitch2;
-        trackedObject.roll = trackedObject.roll2;
-        trackedObject.yaw = trackedObject.yaw2;
-    }
-    trackedObject.n0 = trackedObject.pitch;
-    trackedObject.n1 = trackedObject.roll;
-    trackedObject.n2 = trackedObject.yaw;
-    trackedObject.angle = outer.angle;
+        idx = 1;
+
+    tracked_object.u = ellipse_centers.u[idx];
+    tracked_object.v = ellipse_centers.v[idx];
+    tracked_object.x = ellipse_centers.t[idx][0];
+    tracked_object.y = ellipse_centers.t[idx][1];
+    tracked_object.z = ellipse_centers.t[idx][2];
+    tracked_object.n0 = ellipse_centers.n[idx][0];
+    tracked_object.n1 = ellipse_centers.n[idx][1];
+    tracked_object.n2 = ellipse_centers.n[idx][2];
+
+    tracked_object.angle = outer.angle;
 }
 
 float CCircleDetect::normalizeAngle(float a)
 {
-    /*TODO note #13*/
     while (a > +M_PI) a += -2 * M_PI;
     while (a < -M_PI) a += +2 * M_PI;
     return a;

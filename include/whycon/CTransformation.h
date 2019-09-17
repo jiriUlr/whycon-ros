@@ -28,62 +28,63 @@ class CTransformation
         CTransformation(float circle_diam);
         ~CTransformation();
 
-        // parameters dynamic reconfigure
-        void setCircleDiameter(float circle_diam);
-
         // update of intrinsic and distortion camera params
         void updateCameraParams(cv::Mat intri, cv::Mat dist);
         void updateCameraParams(double *intri, double* dist);
 
-        // get back image coords from canonical coords
-        void reTransformXY(float *x, float *y, float *z);
+        /* calculate marker 3D or 2D coordinates in user-defined coordinate system from the segment description provided by the CCircleDetector class, see 4.1-4.4 of [1] */
+        SEllipseCenters calcSolutions(SSegment segment);
 
-        /*image to canonical coordinates (unbarrel + focal center and length)*/
-        void transformXY(float *ix,float *iy);
+        /* calculate the pattern 3D position from its ellipse characteristic equation, see 4.3 of [1] */
+        SEllipseCenters calcEigen(float *data);
 
-        /*calculate marker 3D or 2D coordinates in user-defined coordinate system from the segment description provided by the CCircleDetector class, see 4.1-4.4 of [1] */
-        STrackedObject transform(SSegment segment);
-
-        /*calculate the pattern 3D position from its ellipse characteristic equation, see 4.3 of [1]*/
-        STrackedObject calcEigen(double data[]);
-
-        /*establish the user-defined coordinate system from four calibration patterns - see 4.4 of [1]*/
-        int calibrate2D(STrackedObject *inp, float dimX, float dimY, float robotRadius = 0, float robotHeight = 0, float cameraHeight = 1.0);
-        
-        int calibrate3D(STrackedObject *o, float gridDimX, float gridDimY);
-        
-        S3DTransform calibrate3D(STrackedObject o0, STrackedObject o1, STrackedObject o2, float gridDimX, float gridDimY);
+        void transformAndAngles(STrackedObject &obj);
 
         /*supporting methods*/
-        ETransformType transform_type_;
         void saveCalibration(const char *str);
         void loadCalibration(const char *str);
-        void saveCalibration(std::string& str);
-        void loadCalibration(std::string& str);
-        float distance(STrackedObject& o1, STrackedObject& o2);
+        void saveCalibration(const std::string &str);
+        void loadCalibration(const std::string &str);
+        
+        void calcQuaternion(STrackedObject &obj);
+        void calcEulerFromQuat(STrackedObject &obj);
 
-        void calcQuaternion(STrackedObject *obj);
-        void calcEulerFromQuat(STrackedObject *obj);
 
-        void setTransformType(ETransformType trans_type);
+        /* DONE */
+        void setTransformType(const ETransformType trans_type);
         ETransformType getTransformType();
 
-    private:
-        STrackedObject normalize(STrackedObject o);
-        STrackedObject transform2D(STrackedObject o);
-        STrackedObject transform3D(STrackedObject o, int num = 4);
-        STrackedObject transform4D(STrackedObject o);
+        /* update circle diameter */
+        void setCircleDiameter(const float circle_diam);
 
-        S3DTransform D3transform[4];
-        float trf4D[16];
-        float hom[9];
-        float gDimX;
-        float gDimY;
+        /*image to canonical coordinates (unbarrel + focal center and length) */
+        void transformXY(float &x,float &y);
+
+        /* get back image coords from canonical coords */
+        void reTransformXY(float &x, float &y, float &z);
+
+        /* establish the user-defined coordinate system from four calibration patterns - see 4.4 of [1] */
+        void calibrate2D(const STrackedObject *in, const float g_dim_x, const float g_dim_y, const float robot_radius = 0.0, const float robot_height = 0.0, const float camera_height = 1.0);
+        void calibrate3D(const STrackedObject *o, const float g_dim_x, const float g_dim_y);
+        S3DTransform calibrate3D(const STrackedObject &o0, const STrackedObject &o1, const STrackedObject &o2, const float g_dim_x, const float g_dim_y);
+
+    private:
+        
+        void transform2D(STrackedObject &o);
+        void transform3D(STrackedObject &o, const int num = 4);
+
+        bool calibrated_;
+        float grid_dim_x_;
+        float grid_dim_y_;
         float circle_diameter_;
+
+        float hom_[9];
+        float trf4D_[16];
+        S3DTransform D3transform_[4];
 
         cv::Mat intrinsic_mat_;
         cv::Mat distortion_coeffs_;
-        bool calibrated_;
+        ETransformType transform_type_;
 };
 
 }
