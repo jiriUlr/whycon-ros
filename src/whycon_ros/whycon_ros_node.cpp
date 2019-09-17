@@ -1,6 +1,14 @@
 #include "whycon_ros/whycon_ros_node.h"
 
+#include <string>
 #include <algorithm>
+
+#include <tf/tf.h>
+#include <geometry_msgs/Quaternion.h>
+#include <visualization_msgs/MarkerArray.h>
+#include "whycon/MarkerArray.h"
+#include "whycon/Marker.h"
+
 
 namespace whycon_ros
 {

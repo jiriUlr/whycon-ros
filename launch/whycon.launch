@@ -14,7 +14,7 @@
     <arg name="pub_visual" default="true" doc="Whether to publish visualization markers"/>
     <arg name="use_gui" default="true" doc="Whether to use GUI"/>
 
-    <node pkg="whycon_ros" type="whycon" name="whycon" output="screen" launch-prefix="">
+    <node pkg="whycon" type="whycon" name="whycon" output="screen" launch-prefix="gdb -ex run --args">
         <remap from="/camera/camera_info" to="$(arg cam_info)"/>
         <remap from="/camera/image_raw" to="$(arg cam_raw)"/>
         

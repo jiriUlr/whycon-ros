@@ -1,20 +1,13 @@
 #ifndef WHYCON_ROS_CWHYCONROSNODE_H
 #define WHYCON_ROS_CWHYCONROSNODE_H
 
-#include <string>
 #include <vector>
-#include <cstring>
 
 #include <ros/ros.h>
-#include <tf/tf.h>
-#include <geometry_msgs/Quaternion.h>
-#include <visualization_msgs/MarkerArray.h>
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 
 #include "whycon/whyconConfig.h"
-#include "whycon/MarkerArray.h"
-#include "whycon/Marker.h"
 
 #include "whycon/SelectMarker.h"
 #include "whycon/SetCalibMethod.h"

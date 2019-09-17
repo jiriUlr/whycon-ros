@@ -6,7 +6,6 @@
 #include "whycon/CCircleDetect.h"
 #include "whycon/CTransformation.h"
 #include "whycon/CNecklace.h"
-#include "whycon/sysmat.h"
 #include "whycon/CRawImage.h"
 #include "whycon/CTimer.h"
 

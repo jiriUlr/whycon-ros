@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string>
 #include <cmath>
-//#include <opencv2/opencv.hpp>
 
 // WhyCon/WhyCode libs
 #include "whycon/CTimer.h"
@@ -15,17 +14,6 @@
 #include "whycon/CTransformation.h"
 #include "whycon/CNecklace.h"
 #include "whycon/CRawImage.h"
-
-// ROS libraries
-#include <ros/ros.h>
-#include <tf/tf.h>
-#include <image_transport/image_transport.h>
-#include <dynamic_reconfigure/server.h>
-#include <whycon_ros/whyconConfig.h>
-#include <whycon_ros/MarkerArray.h>
-#include <whycon_ros/Marker.h>
-#include <geometry_msgs/Quaternion.h>
-#include <visualization_msgs/MarkerArray.h>
 
 namespace whycon
 {

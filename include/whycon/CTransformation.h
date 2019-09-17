@@ -13,8 +13,9 @@
 #include <cstdio>
 #include <cmath>
 #include <string>
-//#include <unistd.h>  // ? why
+
 #include <opencv2/opencv.hpp>
+
 #include "whycon/SStructDefs.h"
 
 namespace whycon
