@@ -1,7 +1,5 @@
 #include "whycon/CTransformation.h"
 
-#include "whycon/sysmat.h"
-
 /*
  * File name: CTransformation.h
  * Date:      2014

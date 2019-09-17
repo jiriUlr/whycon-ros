@@ -76,13 +76,12 @@ add_executable(whycon
     src/whycon/CCircleDetect.cpp
     src/whycon/CRawImage.cpp
     src/whycon/CTimer.cpp
-    src/whycon/sysmat.cpp
     src/whycon/CTransformation.cpp
     src/whycon/CNecklace.cpp
     )
 
-target_link_libraries(whycon ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 add_dependencies(whycon ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${PROJECT_NAME}_gencfg)
+target_link_libraries(whycon ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 
 #############
 ## Install ##
