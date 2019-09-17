@@ -171,9 +171,9 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
         marker.position.orientation = orientation;
 
         // Euler angles
-        marker.rotation.x = detection.obj.theta;
-        marker.rotation.y = detection.obj.phi;
-        marker.rotation.z = detection.obj.psi;
+        // marker.rotation.x = detection.obj.theta;
+        // marker.rotation.y = detection.obj.phi;
+        // marker.rotation.z = detection.obj.psi;
 
         marker_array.markers.push_back(marker);
     }
@@ -273,10 +273,8 @@ CWhyconROSNode::CWhyconROSNode()
     select_marker_srv_ = nh.advertiseService("select_marker", &CWhyconROSNode::selectMarkerCallback, this);
 
     // create dynamic reconfigure server
-    dynamic_reconfigure::Server<whycon::whyconConfig> dyn_srv;
-    dynamic_reconfigure::Server<whycon::whyconConfig>::CallbackType dyn_srv_cb;
-    dyn_srv_cb = boost::bind(&CWhyconROSNode::reconfigureCallback, this, _1, _2);
-    dyn_srv.setCallback(dyn_srv_cb);
+    dyn_srv_cb_ = boost::bind(&CWhyconROSNode::reconfigureCallback, this, _1, _2);
+    dyn_srv_.setCallback(dyn_srv_cb_);
 }
 
 CWhyconROSNode::~CWhyconROSNode()
