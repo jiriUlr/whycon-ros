@@ -8,7 +8,7 @@ typedef struct
 {
     float angle;    // axis rotation angle
     int id;         // marker decoded ID
-    int edgeIndex;
+    int edgeIndex;  // idx of starting edge
 } SDecoded;
 
 
@@ -17,19 +17,19 @@ typedef struct
 {
     float x;                    // center in image coordinates
     float y;                    // center in image coordinates
-    float angle,horizontal;     // orientation (not really used in this case, see the SwarmCon version of this software)
+    float angle, horizontal;    // orientation (not really used in this case, see the SwarmCon version of this software)
     int size;                   // number of pixels
-    int maxy,maxx,miny,minx;    // bounding box dimensions
+    int maxy, maxx, miny, minx; // bounding box dimensions
     int mean;                   // mean brightness
     int type;                   // black or white ?
     float roundness;            // result of the first roundness test, see Eq. 2 of paper [1]
     float bwRatio;              // ratio of white to black pixels, see Algorithm 2 of paper [1]
     bool round;                 // segment passed the initial roundness test
     bool valid;                 // marker passed all tests and will be passed to the transformation phase
-    float m0,m1;                // eigenvalues of the pattern's covariance matrix, see Section 3.3 of [1]
-    float v0,v1;                // eigenvectors of the pattern's covariance matrix, see Section 3.3 of [1]
-    float r0,r1;                // ratio of inner vs outer ellipse dimensions (used to establish ID, see the SwarmCon version of this class)
-    int ID;                     // pattern ID (experimental, see the SwarmCon version of this class)
+    float m0, m1;               // eigenvalues of the pattern's covariance matrix, see Section 3.3 of [1]
+    float v0, v1;               // eigenvectors of the pattern's covariance matrix, see Section 3.3 of [1]
+    float r0, r1;               // ratio of inner vs outer ellipse dimensions (used to establish ID, see the SwarmCon version of this class)
+    int ID;                     // pattern ID
 } SSegment;
 
 // which transform to use

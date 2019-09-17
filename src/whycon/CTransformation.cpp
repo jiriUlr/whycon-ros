@@ -12,13 +12,6 @@
 namespace whycon
 {
 
-int sortByDistance(const void* m1, const void* m2)
-{
-    if (((STrackedObject*)m1)->d > ((STrackedObject*)m2)->d) return -1;
-    if (((STrackedObject*)m1)->d < ((STrackedObject*)m2)->d) return 1;
-    return 0;
-}
-
 CTransformation::CTransformation(float circle_diam) :
     transform_type_(TRANSFORM_NONE),
     circle_diameter_(circle_diam)
@@ -31,7 +24,7 @@ CTransformation::~CTransformation()
 {
 }
 
-void CTransformation::setTransformType(ETransformType trans_type)
+void CTransformation::setTransformType(const ETransformType trans_type)
 {
     if(calibrated_ || trans_type == TRANSFORM_NONE)
     {
@@ -238,7 +231,7 @@ void CTransformation::loadCalibration(const char *str)
     }
 }
 
-void CTransformation::loadCalibration(std::string& str)
+void CTransformation::loadCalibration(const std::string &str)
 {
     try
     {

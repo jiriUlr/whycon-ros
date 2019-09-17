@@ -79,7 +79,7 @@ class CWhycon {
         const int auto_calibration_steps_ = 30;         // how many measurements to average to estimate calibration pattern position (automatic calib)  
         const int auto_calibration_pre_steps_ = 10;     // how many measurements to discard before starting to actually auto-calibrating (automatic calib)  
         int calib_num_ = 5;                             // number of objects acquired for calibration (5 means calibration winished inactive)
-        STrackedObject calib_[5];                       // array to store calibration patterns positions
+        STrackedObject calib_[4];                       // array to store calibration patterns positions
         std::vector<STrackedObject> calib_tmp_;         // array to store several measurements of a given calibration pattern
         int calib_step_ = calibration_steps_ + 2;       // actual calibration step (num of measurements of the actual pattern)
         
