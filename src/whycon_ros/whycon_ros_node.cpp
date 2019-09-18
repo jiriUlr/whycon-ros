@@ -3,8 +3,7 @@
 #include <string>
 #include <algorithm>
 
-#include <tf/tf.h>
-#include <geometry_msgs/Quaternion.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 #include "whycon/MarkerArray.h"
 #include "whycon/Marker.h"
@@ -13,14 +12,14 @@
 namespace whycon_ros
 {
 
-bool CWhyconROSNode::setDrawingCallback(whycon::SetDrawing::Request& req, whycon::SetDrawing::Response& res)
+bool CWhyconROSNode::setDrawingCallback(whycon::SetDrawing::Request &req, whycon::SetDrawing::Response &res)
 {
     whycon_.setDrawing(req.draw_coords, req.draw_segments);
     res.success = true;
     return true;
 }
 
-bool CWhyconROSNode::setCoordsCallback(whycon::SetCoords::Request& req, whycon::SetCoords::Response& res)
+bool CWhyconROSNode::setCoordsCallback(whycon::SetCoords::Request &req, whycon::SetCoords::Response &res)
 {
     try
     {
@@ -35,7 +34,7 @@ bool CWhyconROSNode::setCoordsCallback(whycon::SetCoords::Request& req, whycon::
     return true;
 }
 
-bool CWhyconROSNode::setCalibMethodCallback(whycon::SetCalibMethod::Request& req, whycon::SetCalibMethod::Response& res)
+bool CWhyconROSNode::setCalibMethodCallback(whycon::SetCalibMethod::Request &req, whycon::SetCalibMethod::Response &res)
 {
     try
     {
@@ -63,7 +62,7 @@ bool CWhyconROSNode::setCalibMethodCallback(whycon::SetCalibMethod::Request& req
     return true;
 }
 
-bool CWhyconROSNode::setCalibPathCallback(whycon::SetCalibPath::Request& req, whycon::SetCalibPath::Response& res)
+bool CWhyconROSNode::setCalibPathCallback(whycon::SetCalibPath::Request &req, whycon::SetCalibPath::Response &res)
 {
     try
     {
@@ -91,7 +90,7 @@ bool CWhyconROSNode::setCalibPathCallback(whycon::SetCalibPath::Request& req, wh
     return true;
 }
 
-bool CWhyconROSNode::selectMarkerCallback(whycon::SelectMarker::Request& req, whycon::SelectMarker::Response& res)
+bool CWhyconROSNode::selectMarkerCallback(whycon::SelectMarker::Request &req, whycon::SelectMarker::Response &res)
 {
     whycon_.selectMarker(req.point.x, req.point.y);
     return true;
@@ -118,9 +117,11 @@ void CWhyconROSNode::reconfigureCallback(whycon::whyconConfig& config, uint32_t 
         config.finalCircularityTolerance, config.areaRatioTolerance,
         config.centerDistanceToleranceRatio, config.centerDistanceToleranceAbs
         );
+
+    identify_ = config.identify;
 }
 
-void CWhyconROSNode::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr& msg)
+void CWhyconROSNode::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr &msg)
 {
     if(msg->K[0] == 0)
     {
@@ -137,18 +138,25 @@ void CWhyconROSNode::cameraInfoCallback(const sensor_msgs::CameraInfo::ConstPtr&
     whycon_.updateCameraInfo(intrinsic_mat_, distortion_coeffs_);
 }
 
-void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
+void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
 {
     // convert sensor_msgs::Image msg to whycon CRawImage
     image_->updateImage((unsigned char*)&msg->data[0], msg->width, msg->height, msg->step / msg->width);
 
     whycon_.processImage(image_, whycon_detections_);
 
-    // Generate information about markers into msgs
+    // generate information about markers into msgs
     whycon::MarkerArray marker_array;
-    marker_array.header = msg->header;
+    marker_array.header.stamp = ros::Time::now();
+    marker_array.header.frame_id = msg->header.frame_id;
+    
+    // tf vector
+    std::vector<geometry_msgs::TransformStamped> transform_array;
 
-    for(const whycon::SMarker& detection : whycon_detections_)
+    // Generate RVIZ visualization marker
+    visualization_msgs::MarkerArray visual_array;
+
+    for(const whycon::SMarker &detection : whycon_detections_)
     {
         whycon::Marker marker;
 
@@ -162,37 +170,51 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
         marker.position.position.x = -detection.obj.y;
         marker.position.position.y = -detection.obj.z;
         marker.position.position.z = detection.obj.x;
-
-        geometry_msgs::Quaternion orientation;
-        orientation.x = detection.obj.qx;
-        orientation.y = detection.obj.qy;
-        orientation.z = detection.obj.qz;
-        orientation.w = detection.obj.qw;
-        marker.position.orientation = orientation;
-
-        // Euler angles
-        // marker.rotation.x = detection.obj.theta;
-        // marker.rotation.y = detection.obj.phi;
-        // marker.rotation.z = detection.obj.psi;
-
+        marker.position.orientation.x = detection.obj.qx;
+        marker.position.orientation.y = detection.obj.qy;
+        marker.position.orientation.z = detection.obj.qz;
+        marker.position.orientation.w = detection.obj.qw;
+        marker.rotation.x = detection.obj.roll;
+        marker.rotation.y = detection.obj.pitch;
+        marker.rotation.z = detection.obj.yaw;
         marker_array.markers.push_back(marker);
-    }
 
-    // Generate RVIZ visualization marker
-    visualization_msgs::MarkerArray visual_array;
+        if(identify_ && publish_tf_)
+        {
+            geometry_msgs::TransformStamped transform_stamped;
 
-    if(publish_visual_)
-    {
-        for(whycon::Marker marker : marker_array.markers)
+            transform_stamped.header.stamp = ros::Time::now();
+            transform_stamped.header.frame_id = msg->header.frame_id;
+            transform_stamped.child_frame_id = "marker_" + std::to_string(detection.seg.ID);
+            transform_stamped.transform.translation.x = -detection.obj.y;
+            transform_stamped.transform.translation.y = -detection.obj.z;
+            transform_stamped.transform.translation.z = detection.obj.x;
+            transform_stamped.transform.rotation.x = detection.obj.qx;
+            transform_stamped.transform.rotation.y = detection.obj.qy;
+            transform_stamped.transform.rotation.z = detection.obj.qz;
+            transform_stamped.transform.rotation.w = detection.obj.qw;
+
+            transform_array.push_back(transform_stamped);
+        }
+
+        if(publish_visual_)
         {
             visualization_msgs::Marker visual_marker;
-            visual_marker.header = msg->header;
-            visual_marker.ns = "whycon_ros";
-            visual_marker.id = marker.id;
+            visual_marker.header.stamp = ros::Time::now();
+            visual_marker.header.frame_id = msg->header.frame_id;
+            visual_marker.ns = "whycon";
+            visual_marker.id = detection.seg.ID;
             visual_marker.type = visualization_msgs::Marker::SPHERE;
             visual_marker.action = visualization_msgs::Marker::MODIFY;
 
-            visual_marker.pose = marker.position;
+            visual_marker.pose.position.x = -detection.obj.y;
+            visual_marker.pose.position.y = -detection.obj.z;
+            visual_marker.pose.position.z = detection.obj.x;
+            visual_marker.pose.orientation.x = detection.obj.qx;
+            visual_marker.pose.orientation.y = detection.obj.qy;
+            visual_marker.pose.orientation.z = detection.obj.qz;
+            visual_marker.pose.orientation.w = detection.obj.qw;
+
             visual_marker.scale.x = 0.5;//circleDiameter;  // meters
             visual_marker.scale.y = 0.25;//circleDiameter;
             visual_marker.scale.z = 0.01;
@@ -200,7 +222,8 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
             visual_marker.color.g = 1.0;
             visual_marker.color.b = 0.0;
             visual_marker.color.a = 1.0;
-            visual_marker.lifetime = ros::Duration(0.2);  // secs
+            visual_marker.lifetime = ros::Duration(0.1);  // secs
+            visual_marker.frame_locked = true;
 
             visual_array.markers.push_back(visual_marker);
         }
@@ -208,16 +231,23 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr& msg)
 
     // publishing detected markers
     if(marker_array.markers.size() > 0)
+    {
         markers_pub_.publish(marker_array);
 
-    if(publish_visual_ && visual_array.markers.size() > 0)
-        visual_pub_.publish(visual_array);
-    
+        if(publish_visual_)
+            visual_pub_.publish(visual_array);
+
+        for(int i = 0; i < transform_array.size(); i++)
+            tf_broad_.sendTransform(transform_array[i]);
+    }
+
     if(use_gui_)
     {
         std::memcpy((void*)&msg->data[0], image_->data_, msg->step * msg->height);
         img_pub_.publish(msg);
     }
+
+    whycon_detections_.clear();
 }
 
 void CWhyconROSNode::start()
@@ -243,8 +273,8 @@ CWhyconROSNode::CWhyconROSNode()
     // obtain parameters
     nh.param("use_gui", use_gui_, true);
     nh.param("pub_visual", publish_visual_, false);
+    nh.param("pub_tf", publish_tf_, false);
     nh.param("circle_diam", circle_diameter_, 0.122);
-
     nh.param("id_bits", id_bits, 6);
     nh.param("id_samples", id_samples, 360);
     nh.param("hamming_dist", hamming_dist, 1);
