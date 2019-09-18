@@ -71,18 +71,22 @@ void CRawImage::drawStats(SMarker &marker, bool trans_2D)
     cv::Scalar color(255, 0, 0);
 
     if(trans_2D)
-    {
-        std::sprintf(text, "%03.0f %03.0f\n%02i %03i", 1000 * marker.obj.x, 1000 * marker.obj.y, marker.obj.ID, (int)(marker.obj.yaw / M_PI * 180));
-    }
+        std::sprintf(text, "%03.0f %03.0f", 1000 * marker.obj.x, 1000 * marker.obj.y);
     else
-    {
-        std::sprintf(text, "%.3f %.3f %.3f\n%02i %.3f %.3f %.3f", marker.obj.x, marker.obj.y, marker.obj.z, marker.obj.ID, marker.obj.pitch, marker.obj.roll, marker.obj.yaw);
-    }
+        std::sprintf(text, "%.3f %.3f %.3f", marker.obj.x, marker.obj.y, marker.obj.z);
 
-    cv::Size text_size = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
-    cv::Point text_pos(marker.seg.minx - 30, marker.seg.maxy + text_size.height);
+    cv::Size text_size0 = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
+    cv::Point text_pos0(marker.seg.minx - 30, marker.seg.maxy + text_size0.height);
+    cv::putText(img, text, text_pos0, font_face, font_scale, color, thickness);
 
-    cv::putText(img, text, text_pos, font_face, font_scale, color, thickness);
+    if(trans_2D)
+        std::sprintf(text, "%02i %03i", marker.seg.ID, (int)(marker.obj.yaw / M_PI * 180));
+    else
+        std::sprintf(text, "%02i %.3f %.3f %.3f", marker.seg.ID, marker.obj.roll, marker.obj.pitch, marker.obj.yaw);
+
+    cv::Size text_size1 = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
+    cv::Point text_pos1(marker.seg.minx - 30, marker.seg.maxy + 2 * text_size1.height + 5);
+    cv::putText(img, text, text_pos1, font_face, font_scale, color, thickness);
 }
 
 void CRawImage::drawGuideCalibration(int calib_num, float dim_x, float dim_y)
@@ -142,20 +146,15 @@ void CRawImage::plotLine(int x, int y)
 {
     int base;
     if (y < 0 || y > height_ - 1)
-    {
         y = height_ / 2;
-    }
+
     if (x < 0 || x > width_ - 1)
-    {
         x = width_ / 2;
-    }
 
     for(int i=0; i < width_;i++)
     {
         if (i == width_ / 2)
-        {
             i++;
-        }
         base = (width_ * y + i) * 3;
         data_[base+0] = 255;
         data_[base+1] = 0;
@@ -166,9 +165,7 @@ void CRawImage::plotLine(int x, int y)
     {
         const int bidx = ((width_ * j) + x) * 3;
         if (j == height_ / 2)
-        {
             j++;
-        }
         data_[bidx+0] = 255;
         data_[bidx+1] = 255;
         data_[bidx+2] = 0;
@@ -188,13 +185,9 @@ double CRawImage::getOverallBrightness(bool upperHalf)
     int limit = 0;
 
     if (upperHalf)
-    {
         limit = 0;
-    }
     else
-    {
         limit = height_ / 2;
-    }
 
     for (int i = limit; i < height_ / 2 + limit; i += step)
     {
@@ -202,13 +195,9 @@ double CRawImage::getOverallBrightness(bool upperHalf)
         {
             pos = (i * width_ + j) * bpp_;
             if (data_[pos] >= 250 && data_[pos + 1] >= 250 && data_[pos + 2] >= 250)
-            {
-                satMax++;  
-            }
+                satMax++;
             if (data_[pos] <= 25 && data_[pos + 1] <= 25 && data_[pos + 2] <= 25)
-            {
                 satMin++;
-            }
             sum += data_[pos] + data_[pos + 1] + data_[pos + 2];
             num++;
         }
