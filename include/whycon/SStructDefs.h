@@ -67,10 +67,8 @@ typedef struct
 // rotation/translation model of the 3D transformation                                                                                                                  
 typedef struct
 {
-    float orig_x;           // translation x
-    float orig_y;           // translation y
-    float orig_z;           // translation z
-    float simlar[3][3];     // rotation description
+    float orig[3];      // translation {x, y, z}
+    float simlar[9];    // rotation description
 } S3DTransform;
 
 typedef struct

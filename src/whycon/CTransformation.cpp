@@ -1,3 +1,6 @@
+#include <cstdio>
+#include <cmath>
+
 #include "whycon/CTransformation.h"
 
 /*
@@ -46,7 +49,7 @@ void CTransformation::setCircleDiameter(const float circle_diam)
     circle_diameter_ = circle_diam;
 }
 
-void CTransformation::updateCameraParams(double *intri, double* dist)
+void CTransformation::updateCameraParams(const double *intri, const double* dist)
 {
     for(int i = 0; i < 5; i++)
         distortion_coeffs_.at<float>(i) = dist[i];
@@ -54,9 +57,7 @@ void CTransformation::updateCameraParams(double *intri, double* dist)
     for(int i = 0; i < 3; i++)
     {
         for(int j = 0; j < 3; j++)
-        {
             intrinsic_mat_.at<float>(i, j) = intri[3 * i + j];
-        }
     }
 }
 
@@ -121,13 +122,13 @@ void CTransformation::transform3D(STrackedObject &o, const int num)
 
     for (int k = 0; k < num; k++)
     {
-        a[0] = o.x - D3transform_[k].orig_x;
-        a[1] = o.y - D3transform_[k].orig_y;
-        a[2] = o.z - D3transform_[k].orig_z;
+        a[0] = o.x - D3transform_[k].orig[0];
+        a[1] = o.y - D3transform_[k].orig[1];
+        a[2] = o.z - D3transform_[k].orig[2];
         
-        result[k][0] = D3transform_[k].simlar[0][0] * a[0] + D3transform_[k].simlar[0][1] * a[1] + D3transform_[k].simlar[0][2] * a[2];
-        result[k][1] = D3transform_[k].simlar[1][0] * a[0] + D3transform_[k].simlar[1][1] * a[1] + D3transform_[k].simlar[1][2] * a[2];
-        result[k][2] = D3transform_[k].simlar[2][0] * a[0] + D3transform_[k].simlar[2][1] * a[1] + D3transform_[k].simlar[2][2] * a[2];
+        result[k][0] = D3transform_[k].simlar[0] * a[0] + D3transform_[k].simlar[1] * a[1] + D3transform_[k].simlar[2] * a[2];
+        result[k][1] = D3transform_[k].simlar[3] * a[0] + D3transform_[k].simlar[4] * a[1] + D3transform_[k].simlar[5] * a[2];
+        result[k][2] = D3transform_[k].simlar[6] * a[0] + D3transform_[k].simlar[7] * a[1] + D3transform_[k].simlar[8] * a[2];
         
         result[k][0] = (k % 2) * grid_dim_x_ + (1 - (k % 2) * 2) * result[k][0];
         result[k][1] = (k / 2) * grid_dim_y_ + (1 - (k / 2) * 2) * result[k][1];
@@ -140,89 +141,12 @@ void CTransformation::transform3D(STrackedObject &o, const int num)
         final[1] += str * result[k][1];
         final[2] += str * result[k][2];
         str_all += str;
-        // printf("UUU: %f %f %f %f\n", result[k][0], result[k][1], result[k][2], str);
+        // std::printf("UUU: %f %f %f %f\n", result[k][0], result[k][1], result[k][2], str);
     }
 
     o.x = final[0] / str_all;
     o.y = final[1] / str_all;
     o.z = final[2] / str_all;
-}
-
-void CTransformation::loadCalibration(const char *str)
-{
-    FILE* file = fopen(str, "r+");
-    int k = 0;
-    if (file == NULL)
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                D3transform_[k].simlar[i][j] = 0;
-            }
-        }
-        D3transform_[k].orig_x = D3transform_[k].orig_y = D3transform_[k].orig_z = 0;
-        for (int i = 0; i <9 ; i++)
-        {
-            hom_[i] = 0;
-        }
-        hom_[8] = 1;
-    }
-    else
-    {
-        char errStr[1000];
-        char dumStr[1000];
-        sprintf(errStr, "Transformation: error reading coordinate system transformation file %s\n", str);
-        if (fscanf(file, "Dimensions %f %f\n", &grid_dim_x_, &grid_dim_y_) != 2)
-        {
-            fprintf(stderr, "%s", errStr);
-        }
-        int dum = 0;
-        for (int k = 0; k < 4; k++)
-        {
-            if (fscanf(file, "3D_calibration %i\n", &dum) != 1)
-            {
-                fprintf(stderr, "%s", errStr);
-            }
-            for (int i = 0; i < 3; i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    if (fscanf(file, "%f ", &D3transform_[k].simlar[i][j]) != 1)
-                    {
-                        fprintf(stderr, "%s", errStr);
-                    }
-                }
-                if (fscanf(file, "\n") != 0)
-                {
-                    fprintf(stderr, "%s", errStr);
-                }
-            }
-            if (fscanf(file, "Offset %f %f %f\n", &D3transform_[k].orig_x, &D3transform_[k].orig_y, &D3transform_[k].orig_z) != 3)
-            {
-                fprintf(stderr, "%s", errStr);
-            }
-        }
-        if (fscanf(file, "%s\n", dumStr) != 1)
-        {
-            fprintf(stderr, "%s", errStr);
-        }
-        for (int i = 0; i < 9; i++)
-        {
-            if (fscanf(file, "%f ", &hom_[i]) != 1)
-            {
-                fprintf(stderr, "%s", errStr);
-            }
-            if (i % 3 == 2)
-            {
-                if (fscanf(file, "\n") != 0)
-                {
-                    fprintf(stderr, "%s", errStr);
-                }
-            }
-        }
-        fclose(file);
-    }
 }
 
 void CTransformation::loadCalibration(const std::string &str)
@@ -231,8 +155,33 @@ void CTransformation::loadCalibration(const std::string &str)
     {
         cv::FileStorage fs(str, cv::FileStorage::READ);
         if(!fs.isOpened())
-        {
             throw std::runtime_error("Could not open/load calibration file.");
+
+        fs["dim_x"] >> grid_dim_x_;
+        fs["dim_y"] >> grid_dim_y_;
+
+        cv::Mat hom_tmp(3, 3, CV_32FC1);
+        fs["hom"] >> hom_tmp;
+        for(int i = 0; i < 3; i++)
+        {
+            for(int j = 0; j < 3; j++)
+                hom_[3 * i + j] = hom_tmp.at<float>(i, j);
+        }
+
+        for(int k = 0; k < 4; k++)
+        {
+            cv::Mat offset_tmp(3, 1, CV_32FC1);
+            fs["offset_" + std::to_string(k)] >> offset_tmp;
+            for(int i = 0; i < 3; i++)
+                D3transform_[k].orig[i] = offset_tmp.at<float>(i);
+
+            cv::Mat simlar_tmp(3, 3, CV_32FC1);
+            fs["simlar_" + std::to_string(k)] >> simlar_tmp;
+            for(int i = 0; i < 3; i++)
+            {
+                for(int j = 0; j < 3; j++)
+                    D3transform_[k].simlar[3 * i + j] = simlar_tmp.at<float>(i, j);
+            }
         }
 
         fs.release();
@@ -243,40 +192,26 @@ void CTransformation::loadCalibration(const std::string &str)
     }
 }
 
-void CTransformation::saveCalibration(const char *str)
-{
-    FILE* file = fopen(str, "w+");
-    fprintf(file, "Dimensions %f %f\n", grid_dim_x_, grid_dim_y_);
-    for (int k = 0; k < 4; k++)
-    {
-        fprintf(file, "3D_calibration %i\n", k);
-        for (int i = 0; i < 3; i++)
-        {
-            for (int j = 0; j < 3; j++)
-            {
-                fprintf(file, "%f ", D3transform_[k].simlar[i][j]);
-            }
-            fprintf(file, "\n");
-        }
-        fprintf(file, "Offset %f %f %f\n", D3transform_[k].orig_x, D3transform_[k].orig_y, D3transform_[k].orig_z);
-    }
-    fprintf(file, "2D_calibration\n");
-    for (int i = 0; i < 9; i++)
-    {
-        fprintf(file, "%f ", hom_[i]);
-        if (i % 3 == 2) fprintf(file, "\n");
-    }
-    fclose(file);
-}
-
 void CTransformation::saveCalibration(const std::string &str)
 {
     try
     {
         cv::FileStorage fs(str, cv::FileStorage::WRITE);
         if(!fs.isOpened())
-        {
             throw std::runtime_error("Could not open/create calibration file.");
+
+        fs.writeComment("Dimensions");
+        fs << "dim_x" << grid_dim_x_;
+        fs << "dim_y" << grid_dim_y_;
+        fs.writeComment("2D calibration");
+        fs << "hom" << cv::Mat(3, 3, CV_32FC1, hom_);
+        fs.writeComment("3D calibration");
+
+        for (int k = 0; k < 4; k++)
+        {
+            fs.writeComment("D3transform " + std::to_string(k));
+            fs << "offset_" + std::to_string(k) << cv::Mat(3, 1, CV_32FC1, D3transform_[k].orig);
+            fs << "simlar_" + std::to_string(k) << cv::Mat(3, 3, CV_32FC1, D3transform_[k].simlar);
         }
 
         fs.release();
@@ -363,9 +298,9 @@ void CTransformation::calibrate3D(const STrackedObject *o, const float g_dim_x, 
 S3DTransform CTransformation::calibrate3D(const STrackedObject &o0, const STrackedObject &o1, const STrackedObject &o2, const float g_dim_x, const float g_dim_y)
 {
     S3DTransform result;
-    result.orig_x = o0.x;
-    result.orig_y = o0.y;
-    result.orig_z = o0.z;
+    result.orig[0] = o0.x;
+    result.orig[1] = o0.y;
+    result.orig[2] = o0.z;
 
     // float scale = 1.0;
     /* v[3] = {x, y, z} */
@@ -392,23 +327,23 @@ S3DTransform CTransformation::calibrate3D(const STrackedObject &o0, const STrack
                      v0[2], v1[2], v2[2]);
     m23D = m23D.inv();
 
-    result.simlar[0][0] = m23D(0, 0) * g_dim_x;
-    result.simlar[0][1] = m23D(0, 1) * g_dim_x;
-    result.simlar[0][2] = m23D(0, 2) * g_dim_x;
+    result.simlar[0] = m23D(0, 0) * g_dim_x;
+    result.simlar[1] = m23D(0, 1) * g_dim_x;
+    result.simlar[2] = m23D(0, 2) * g_dim_x;
 
-    result.simlar[1][0] = m23D(1, 0) * g_dim_y;
-    result.simlar[1][1] = m23D(1, 1) * g_dim_y;
-    result.simlar[1][2] = m23D(1, 2) * g_dim_y;
+    result.simlar[3] = m23D(1, 0) * g_dim_y;
+    result.simlar[4] = m23D(1, 1) * g_dim_y;
+    result.simlar[5] = m23D(1, 2) * g_dim_y;
 
-    result.simlar[2][0] = m23D(2, 0) * g_dim_x * g_dim_y;
-    result.simlar[2][1] = m23D(2, 1) * g_dim_x * g_dim_y;
-    result.simlar[2][2] = m23D(2, 2) * g_dim_x * g_dim_y;
+    result.simlar[6] = m23D(2, 0) * g_dim_x * g_dim_y;
+    result.simlar[7] = m23D(2, 1) * g_dim_x * g_dim_y;
+    result.simlar[8] = m23D(2, 2) * g_dim_x * g_dim_y;
 
     transform_type_ = TRANSFORM_3D;
     return result;
 }
 
-SEllipseCenters CTransformation::calcEigen(float *data)
+SEllipseCenters CTransformation::calcEigen(const float *data)
 {
     SEllipseCenters result;
     cv::Matx31f val;
@@ -478,14 +413,14 @@ SEllipseCenters CTransformation::calcEigen(float *data)
 
             idx++;
 
-            // std::printf("%.3f %.3f %.3f %.3f %.3f %.3f\n", t0, t1, t2, n0, n1, n2);
+            // std::printf("calcEigen %d %.3f %.3f %.3f %.3f %.3f %.3f\n", idx, t0, t1, t2, n0, n1, n2);
         }
     }
 
     return result;
 }
 
-SEllipseCenters CTransformation::calcSolutions(SSegment segment)
+SEllipseCenters CTransformation::calcSolutions(const SSegment segment)
 {
     float x, y, x1, x2, y1, y2, major, minor, v0, v1;
 
@@ -504,10 +439,10 @@ SEllipseCenters CTransformation::calcSolutions(SSegment segment)
     transformXY(x1, y1);
     transformXY(x2, y2);
     // semiaxes length
-    major = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 2.0;
+    major = std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 2.0;
     v0 = (x2 - x1) / major / 2.0;
     v1 = (y2 - y1) / major / 2.0;
-    // printf("AAA: %f %f\n", sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) - sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2)), major);
+    // std::printf("AAA: %f %f\n", std::sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) - sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2)), major);
 
     // the minor axis
     // vertices in image coords
@@ -519,8 +454,8 @@ SEllipseCenters CTransformation::calcSolutions(SSegment segment)
     transformXY(x1, y1);
     transformXY(x2, y2);
     // minor axis length
-    minor = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 2.0;
-    // printf("BBB: %f %f\n", sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) - sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2)), minor);
+    minor = std::sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)) / 2.0;
+    // std::printf("BBB: %f %f\n", std::sqrt((x - x1) * (x - x1) + (y - y1) * (y - y1)) - sqrt((x - x2) * (x - x2) + (y - y2) * (y - y2)), minor);
 
     /* construct the ellipse characteristic equation, see 4.2 of [1], prepare coefs for Eq */
     float a, b, c, d, e, f;
@@ -535,10 +470,8 @@ SEllipseCenters CTransformation::calcSolutions(SSegment segment)
     return calcEigen(data);
 }
 
-void CTransformation::transformAndAngles(STrackedObject &obj)
+void CTransformation::transformCoordinates(STrackedObject &obj)
 {
-    calcQuaternion(obj);
-
     /* transformation to camera-centric or user-defined coordinate frames */
     switch(transform_type_)
     {
@@ -565,6 +498,12 @@ void CTransformation::transformAndAngles(STrackedObject &obj)
             break;
         }
     }
+}
+
+void CTransformation::calcOrientation(STrackedObject &obj)
+{
+    calcQuaternion(obj);
+    calcEulerFromQuat(obj);
 }
 
 // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
@@ -629,9 +568,28 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
 }
 
 // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToEuler/index.htm
-/*void CTransformation::calcEulerFromQuat(STrackedObject &obj)
+// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+void CTransformation::calcEulerFromQuat(STrackedObject &obj)
 {
-    float test = obj.qx * obj.qy + obj.qz * obj.qw;
+    // roll (x-axis rotation)
+    float sinr_cosp = +2.0 * (obj.qw * obj.qx + obj.qy * obj.qz);
+    float cosr_cosp = +1.0 - 2.0 * (obj.qx * obj.qx + obj.qy * obj.qy);
+    obj.roll = std::atan2(sinr_cosp, cosr_cosp);
+
+    // pitch (y-axis rotation)
+    float sinp = +2.0 * (obj.qw * obj.qy - obj.qz * obj.qx);
+    if (std::fabs(sinp) >= 1)
+        obj.pitch = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+    else
+        obj.pitch = std::asin(sinp);
+
+    // yaw (z-axis rotation)
+    float siny_cosp = +2.0 * (obj.qw * obj.qz + obj.qx * obj.qy);
+    float cosy_cosp = +1.0 - 2.0 * (obj.qy * obj.qy + obj.qz * obj.qz);
+    obj.yaw = std::atan2(siny_cosp, cosy_cosp);
+
+
+    /*float test = obj.qx * obj.qy + obj.qz * obj.qw;
     if(test > 0.499) // singularity at north pole
     {
         obj.theta = 2 * std::atan2(obj.qx, obj.qw);
@@ -654,7 +612,7 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
         obj.phi = std::asin(2 * test);
         obj.psi = std::atan2(2 * (obj.qx * obj.qw - obj.qy * obj.qz), 1 - 2 * (sqx + sqz));
     }
-    //printf("theta %.3f phi %.3f psi %.3f\n", obj.theta, obj.phi, obj.psi);
-}*/
+    // std::printf("theta %.3f phi %.3f psi %.3f\n", obj.theta, obj.phi, obj.psi);*/
+}
 
 }

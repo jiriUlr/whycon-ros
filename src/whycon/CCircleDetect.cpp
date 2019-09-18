@@ -528,7 +528,8 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
         else
             ambiguityPlain();
 
-        trans_->transformAndAngles(tracked_object);
+        trans_->calcOrientation(tracked_object);
+        trans_->transformCoordinates(tracked_object);
     }
 
     // drawing results 
@@ -574,8 +575,6 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
             }
         }
     }
-
-    std::printf("%.3f %.3f %.3f %.3f %.3f %.3f\n", tracked_object.x, tracked_object.y, tracked_object.z, tracked_object.n0, tracked_object.n1, tracked_object.n2);
 
     bufferCleanup(outer);
 
