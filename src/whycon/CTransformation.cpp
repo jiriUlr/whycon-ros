@@ -507,6 +507,7 @@ void CTransformation::calcOrientation(STrackedObject &obj)
 }
 
 // http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToQuaternion/index.htm
+// https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
 void CTransformation::calcQuaternion(STrackedObject &obj)
 {
     cv::Vec3f initial_norm(0.0, 0.0, 1.0);
@@ -522,43 +523,44 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
     float qz1 = axis_vec[2] * s;
     float qw1 = std::cos(rot_angle / 2.0);
 
-    float scale = std::sqrt(qx1*qx1 + qy1*qy1 + qz1*qz1 + qw1*qw1);
-    //std::printf("quat1 norm %.3f\n", scale);
+    /* float scale = std::sqrt(qx1*qx1 + qy1*qy1 + qz1*qz1 + qw1*qw1);
+    std::printf("quat1 norm %.3f\n", scale);
     if(std::fabs(scale - 1) > 1e-6){
         qx1 /= scale;
         qy1 /= scale;
         qz1 /= scale;
         qw1 /= scale;
-    }
+    }*/
 
     obj.qx = qx1;
     obj.qy = qy1;
     obj.qz = qz1;
     obj.qw = qw1;
 
-    //std::printf("angle %.3f\n", obj.angle);
-    /*s = std::sin(obj.angle / 2.0);
+    std::printf("angle %f\n", obj.angle);
+    s = std::sin(obj.angle / 2.0);
     float qx2 = final_norm[0] * s;
     float qy2 = final_norm[1] * s;
     float qz2 = final_norm[2] * s;
     float qw2 = std::cos(obj.angle / 2.0);
 
-    scale = std::sqrt(qx2*qx2 + qy2*qy2 + qz2*qz2 + qw2*qw2);
-    //std::printf("quat2 norm %.3f\n", scale);
+    /* scale = std::sqrt(qx2*qx2 + qy2*qy2 + qz2*qz2 + qw2*qw2);
+    std::printf("quat2 norm %f\n", scale);
     if(std::fabs(scale - 1) > 1e-6){
         qx2 /= scale;
         qy2 /= scale;
         qz2 /= scale;
         qw2 /= scale;
-    }
+    }*/
 
+    /* Hamilton product: at first applying q1 and then rotation q2 */
     obj.qx = qw2 * qx1 + qx2 * qw1 + qy2 * qz1 - qz2 * qy1;
     obj.qy = qw2 * qy1 - qx2 * qz1 + qy2 * qw1 + qz2 * qx1;
     obj.qz = qw2 * qz1 + qx2 * qy1 - qy2 * qx1 + qz2 * qw1;
     obj.qw = qw2 * qw1 - qx2 * qx1 - qy2 * qy1 - qz2 * qz1;
 
-    scale = std::sqrt(obj.qx*obj.qx + obj.qy*obj.qy + obj.qz*obj.qz + obj.qw*obj.qw);
-    //std::printf("quatFin norm %.3f\n", scale);
+    /* scale = std::sqrt(obj.qx*obj.qx + obj.qy*obj.qy + obj.qz*obj.qz + obj.qw*obj.qw);
+    std::printf("quatFin norm %f\n", scale);
     if(std::fabs(scale - 1) > 1e-6){
         obj.qx /= scale;
         obj.qy /= scale;
@@ -567,7 +569,7 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
     }*/
 }
 
-// http://www.euclideanspace.com/maths/geometry/rotations/conversions/angleToEuler/index.htm
+// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
 // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 void CTransformation::calcEulerFromQuat(STrackedObject &obj)
 {
@@ -589,7 +591,7 @@ void CTransformation::calcEulerFromQuat(STrackedObject &obj)
     obj.yaw = std::atan2(siny_cosp, cosy_cosp);
 
 
-    /*float test = obj.qx * obj.qy + obj.qz * obj.qw;
+    /* float test = obj.qx * obj.qy + obj.qz * obj.qw;
     if(test > 0.499) // singularity at north pole
     {
         obj.theta = 2 * std::atan2(obj.qx, obj.qw);
@@ -609,10 +611,10 @@ void CTransformation::calcEulerFromQuat(STrackedObject &obj)
         float sqy = obj.qy * obj.qy;
         float sqz = obj.qz * obj.qz;
         obj.theta = std::atan2(2 * (obj.qy * obj.qw - obj.qx * obj.qz), 1 - 2 * (sqy + sqz));
-        obj.phi = std::asin(2 * test);
+        obj.pitch = std::asin(2 * test);
         obj.psi = std::atan2(2 * (obj.qx * obj.qw - obj.qy * obj.qz), 1 - 2 * (sqx + sqz));
-    }
-    // std::printf("theta %.3f phi %.3f psi %.3f\n", obj.theta, obj.phi, obj.psi);*/
+    }*/
+    // std::printf("roll %.3f pitch %.3f yaw %.3f\n", obj.roll, obj.pitch, obj.yaw);
 }
 
 }
