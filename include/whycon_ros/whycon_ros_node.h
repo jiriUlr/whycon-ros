@@ -7,8 +7,9 @@
 #include <image_transport/image_transport.h>
 #include <dynamic_reconfigure/server.h>
 
-#include "whycon/whyconConfig.h"
+#include <tf2_ros/transform_broadcaster.h>
 
+#include "whycon/whyconConfig.h"
 #include "whycon/SelectMarker.h"
 #include "whycon/SetCalibMethod.h"
 #include "whycon/SetCalibPath.h"
@@ -76,6 +77,10 @@ class CWhyconROSNode
 
         dynamic_reconfigure::Server<whycon::whyconConfig> dyn_srv_;
         dynamic_reconfigure::Server<whycon::whyconConfig>::CallbackType dyn_srv_cb_;
+
+        bool identify_;
+        bool publish_tf_;
+        tf2_ros::TransformBroadcaster tf_broad_;
 };
 
 }
