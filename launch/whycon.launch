@@ -1,30 +1,32 @@
 <?xml version="1.0"?>
 <launch>
 
-    <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="reconfigurator"/>
+  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="reconfigurator"/>
+  
+  <arg name="cam_info"  default="/usb_cam/camera_info"  doc="camera_info topic"/>
+  <arg name="cam_raw"   default="/usb_cam/image_raw"    doc="image_raw topic"/>
+
+  <arg name="circle_diam"   default="0.122" doc="Outer circle diameter in meters"/>
+  <arg name="id_bits"       default="6"     doc="Number of encoded bits"/>
+  <arg name="id_samples"    default="360"   doc="Number of samples to detect ID"/>
+  <arg name="hamming_dist"  default="1"     doc="Hamming distance used for ID"/>
+  <arg name="num_markers"   default="1"     doc="Initial number of markers to detect"/>
+  <arg name="pub_tf"        default="true"  doc="Whether to publish transformations from camera to marker frame"/>
+  <arg name="pub_visual"    default="true"  doc="Whether to publish visualization markers"/>
+  <arg name="use_gui"       default="true"  doc="Whether to use GUI"/>
+
+  <node pkg="whycon" type="whycon" name="whycon" output="screen" launch-prefix="gdb -ex run --args">
+    <remap from="/camera/camera_info" to="$(arg cam_info)"/>
+    <remap from="/camera/image_raw"   to="$(arg cam_raw)"/>
     
-    <arg name="cam_info" default="/usb_cam/camera_info" doc="camera_info topic"/>
-    <arg name="cam_raw" default="/usb_cam/image_raw" doc="image_raw topic"/>
-
-    <arg name="circle_diam" default="0.122" doc="Outer circle diameter in meters"/>
-    <arg name="id_bits" default="6" doc="Number of encoded bits"/>
-    <arg name="id_samples" default="360" doc="Number of samples to detect ID"/>
-    <arg name="hamming_dist" default="1" doc="Hamming distance used for ID"/>
-    <arg name="num_markers" default="1" doc="Initial number of markers to detect"/>
-    <arg name="pub_visual" default="true" doc="Whether to publish visualization markers"/>
-    <arg name="use_gui" default="true" doc="Whether to use GUI"/>
-
-    <node pkg="whycon" type="whycon" name="whycon" output="screen" launch-prefix="gdb -ex run --args">
-        <remap from="/camera/camera_info" to="$(arg cam_info)"/>
-        <remap from="/camera/image_raw" to="$(arg cam_raw)"/>
-        
-        <param name="circle_diam" value="$(arg circle_diam)"/>
-        <param name="id_bits" value="$(arg id_bits)"/>
-        <param name="id_samples" value="$(arg id_samples)"/>
-        <param name="hamming_dist" value="$(arg hamming_dist)"/>
-        <param name="num_markers" value="$(arg num_markers)"/>
-        <param name="pub_visual" value="$(arg pub_visual)"/>
-        <param name="use_gui" value="$(arg use_gui)"/>
-    </node>
+    <param name="circle_diam"   value="$(arg circle_diam)"/>
+    <param name="id_bits"       value="$(arg id_bits)"/>
+    <param name="id_samples"    value="$(arg id_samples)"/>
+    <param name="hamming_dist"  value="$(arg hamming_dist)"/>
+    <param name="num_markers"   value="$(arg num_markers)"/>
+    <param name="pub_tf"        value="$(arg pub_tf)"/>
+    <param name="pub_visual"    value="$(arg pub_visual)"/>
+    <param name="use_gui"       value="$(arg use_gui)"/>
+  </node>
 
 </launch>
