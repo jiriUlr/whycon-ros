@@ -569,51 +569,22 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
     }*/
 }
 
-// http://www.euclideanspace.com/maths/geometry/rotations/conversions/quaternionToEuler/index.htm
 // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 void CTransformation::calcEulerFromQuat(STrackedObject &obj)
 {
     // roll (x-axis rotation)
-    float sinr_cosp = +2.0 * (obj.qw * obj.qx + obj.qy * obj.qz);
-    float cosr_cosp = +1.0 - 2.0 * (obj.qx * obj.qx + obj.qy * obj.qy);
-    obj.roll = std::atan2(sinr_cosp, cosr_cosp);
+    obj.roll = std::atan2(2.0 * (obj.qw * obj.qx + obj.qy * obj.qz), 1.0 - 2.0 * (obj.qx * obj.qx + obj.qy * obj.qy));
 
     // pitch (y-axis rotation)
-    float sinp = +2.0 * (obj.qw * obj.qy - obj.qz * obj.qx);
+    float sinp = 2.0 * (obj.qw * obj.qy - obj.qz * obj.qx);
     if (std::fabs(sinp) >= 1)
         obj.pitch = std::copysign(M_PI / 2, sinp); // use 90 degrees if out of range
     else
         obj.pitch = std::asin(sinp);
 
     // yaw (z-axis rotation)
-    float siny_cosp = +2.0 * (obj.qw * obj.qz + obj.qx * obj.qy);
-    float cosy_cosp = +1.0 - 2.0 * (obj.qy * obj.qy + obj.qz * obj.qz);
-    obj.yaw = std::atan2(siny_cosp, cosy_cosp);
+    obj.yaw = std::atan2(2.0 * (obj.qw * obj.qz + obj.qx * obj.qy), 1.0 - 2.0 * (obj.qy * obj.qy + obj.qz * obj.qz));
 
-
-    /* float test = obj.qx * obj.qy + obj.qz * obj.qw;
-    if(test > 0.499) // singularity at north pole
-    {
-        obj.theta = 2 * std::atan2(obj.qx, obj.qw);
-        obj.phi = M_PI / 2.0;
-        obj.psi = 0;
-    }
-    else if(test < -0.499) // singularity at south pole
-    {
-        obj.theta = -2 * std::atan2(obj.qx, obj.qw);
-        obj.phi = -M_PI / 2.0;
-        obj.psi = 0;
-        return;
-    }
-    else
-    {
-        float sqx = obj.qx * obj.qx;
-        float sqy = obj.qy * obj.qy;
-        float sqz = obj.qz * obj.qz;
-        obj.theta = std::atan2(2 * (obj.qy * obj.qw - obj.qx * obj.qz), 1 - 2 * (sqy + sqz));
-        obj.pitch = std::asin(2 * test);
-        obj.psi = std::atan2(2 * (obj.qx * obj.qw - obj.qy * obj.qz), 1 - 2 * (sqx + sqz));
-    }*/
     // std::printf("roll %.3f pitch %.3f yaw %.3f\n", obj.roll, obj.pitch, obj.yaw);
 }
 
