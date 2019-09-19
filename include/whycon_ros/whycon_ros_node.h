@@ -72,8 +72,8 @@ class CWhyconROSNode
 
         std::vector<whycon::SMarker> whycon_detections_;    // array of detected markers
         
-        std::vector<double> intrinsic_mat_;        // intrinsic matrix from camera_info topic
-        std::vector<double> distortion_coeffs_;    // distortion parameters from camera_info topic
+        std::vector<float> intrinsic_mat_;        // intrinsic matrix from camera_info topic
+        std::vector<float> distortion_coeffs_;    // distortion parameters from camera_info topic
 
         dynamic_reconfigure::Server<whycon::whyconConfig> dyn_srv_;
         dynamic_reconfigure::Server<whycon::whyconConfig>::CallbackType dyn_srv_cb_;

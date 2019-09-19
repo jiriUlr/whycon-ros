@@ -354,9 +354,9 @@ void CWhycon::updateConfiguration(bool id, float diam, int markers, int size, do
     for(int i = 0; i < num_markers_; i++) detector_array_[i]->reconfigure(ict, fct, art, cdtr, cdta, id, size);
 }
 
-void CWhycon::updateCameraInfo(std::vector<double> &intrinsic_mat, std::vector<double> &distortion_coeffs)
+void CWhycon::updateCameraInfo(std::vector<float> &intrinsic_mat, std::vector<float> &distortion_coeffs)
 {
-    trans_->updateCameraParams(intrinsic_mat.data(), distortion_coeffs.data());
+    trans_->updateCameraParams(intrinsic_mat, distortion_coeffs);
 }
 
 void CWhycon::init(float circle_diam, bool use_gui, int id_b, int id_s, int ham_dist, int markers, int img_w, int img_h)

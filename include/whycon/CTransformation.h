@@ -27,8 +27,7 @@ class CTransformation
         ~CTransformation();
 
         /* update of intrinsic and distortion camera params */
-        void updateCameraParams(cv::Mat intri, cv::Mat dist);
-        void updateCameraParams(const double *intri, const double* dist);
+        void updateCameraParams(const std::vector<float> &intri, const std::vector<float> &dist);
 
         /* calculate marker 3D or 2D coordinates in user-defined coordinate system from the segment description provided by the CCircleDetector class, see 4.1-4.4 of [1] */
         SEllipseCenters calcSolutions(const SSegment segment);

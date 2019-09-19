@@ -51,8 +51,8 @@ class CWhycon {
         void saveCalibration(std::string& path);
         void selectMarker(float x, float y);
         void updateConfiguration(bool id, float diam, int markers, int size, double fl, double fw, double ict, double fct, double art, double cdtr, double cdta);
-        void updateCameraInfo(std::vector<double>& intrinsic_mat, std::vector<double>& distortion_coeffs);
-        void processImage(CRawImage *image, std::vector<SMarker>& whycon_detections);
+        void updateCameraInfo(std::vector<float> &intrinsic_mat, std::vector<float> &distortion_coeffs);
+        void processImage(CRawImage *image, std::vector<SMarker> &whycon_detections);
 
     private:
 

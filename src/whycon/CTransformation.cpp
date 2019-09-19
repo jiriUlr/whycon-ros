@@ -49,7 +49,7 @@ void CTransformation::setCircleDiameter(const float circle_diam)
     circle_diameter_ = circle_diam;
 }
 
-void CTransformation::updateCameraParams(const double *intri, const double* dist)
+void CTransformation::updateCameraParams(const std::vector<float> &intri, const std::vector<float> &dist)
 {
     for(int i = 0; i < 5; i++)
         distortion_coeffs_.at<float>(i) = dist[i];
@@ -59,12 +59,6 @@ void CTransformation::updateCameraParams(const double *intri, const double* dist
         for(int j = 0; j < 3; j++)
             intrinsic_mat_.at<float>(i, j) = intri[3 * i + j];
     }
-}
-
-void CTransformation::updateCameraParams(cv::Mat intri, cv::Mat dist)
-{
-    intrinsic_mat_ = intri;
-    distortion_coeffs_ = dist;
 }
 
 void CTransformation::reTransformXY(float &x, float &y, float &z)
