@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
     visualization_msgs
     message_generation
     dynamic_reconfigure
-    tf
+    tf2_ros
     )
 
 find_package(OpenCV REQUIRED)
