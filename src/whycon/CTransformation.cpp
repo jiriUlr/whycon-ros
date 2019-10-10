@@ -105,42 +105,73 @@ void CTransformation::transform2D(STrackedObject &o)
 void CTransformation::transform3D(STrackedObject &o, const int num)
 {
     /* [3] = {x, y, z} */
-    float a[3];
-    float final[3] = {0.0, 0.0, 0.0};
+    float t[3];
+    float n[3];
+    float final_t[3] = {0.0, 0.0, 0.0};
+    float final_n[3] = {0.0, 0.0, 0.0};
+    float result_t[3];
+    float result_n[3];
+    float str_t;
+    float str_n;
+    float str_all_t = 0.0;
+    float str_all_n = 0.0;
 
-    /* result[4][3] = {{x1, y1, z1}, {x2, y2, z2}, {x3, y3, z3}, {x4, y4, z4}} */
-    float result[4][3];
-
-    float str = 0;
-    float str_all = 0;
-
-    for (int k = 0; k < num; k++)
+    for (int i = 0; i < num; i++)
     {
-        a[0] = o.x - D3transform_[k].orig[0];
-        a[1] = o.y - D3transform_[k].orig[1];
-        a[2] = o.z - D3transform_[k].orig[2];
-        
-        result[k][0] = D3transform_[k].simlar[0] * a[0] + D3transform_[k].simlar[1] * a[1] + D3transform_[k].simlar[2] * a[2];
-        result[k][1] = D3transform_[k].simlar[3] * a[0] + D3transform_[k].simlar[4] * a[1] + D3transform_[k].simlar[5] * a[2];
-        result[k][2] = D3transform_[k].simlar[6] * a[0] + D3transform_[k].simlar[7] * a[1] + D3transform_[k].simlar[8] * a[2];
-        
-        result[k][0] = (k % 2) * grid_dim_x_ + (1 - (k % 2) * 2) * result[k][0];
-        result[k][1] = (k / 2) * grid_dim_y_ + (1 - (k / 2) * 2) * result[k][1];
-        if (k == 0 || k == 3)
-            result[k][2] = -result[k][2];
+        // transformation of position
+        t[0] = o.x - D3transform_[i].orig[0];
+        t[1] = o.y - D3transform_[i].orig[1];
+        t[2] = o.z - D3transform_[i].orig[2];
 
-        str = 1.0 / (a[0] * a[0] + a[1] * a[1] + a[2] * a[2] + 0.01);
+        result_t[0] = D3transform_[i].simlar[0] * t[0] + D3transform_[i].simlar[1] * t[1] + D3transform_[i].simlar[2] * t[2];
+        result_t[1] = D3transform_[i].simlar[3] * t[0] + D3transform_[i].simlar[4] * t[1] + D3transform_[i].simlar[5] * t[2];
+        result_t[2] = D3transform_[i].simlar[6] * t[0] + D3transform_[i].simlar[7] * t[1] + D3transform_[i].simlar[8] * t[2];
+        
+        result_t[0] = (i % 2) * grid_dim_x_ + (1 - (i % 2) * 2) * result_t[0];
+        result_t[1] = (i / 2) * grid_dim_y_ + (1 - (i / 2) * 2) * result_t[1];
+        if (i == 0 || i == 3)
+            result_t[2] = -result_t[2];
 
-        final[0] += str * result[k][0];
-        final[1] += str * result[k][1];
-        final[2] += str * result[k][2];
-        str_all += str;
-        // std::printf("UUU: %f %f %f %f\n", result[k][0], result[k][1], result[k][2], str);
+        str_t = 1.0 / (t[0] * t[0] + t[1] * t[1] + t[2] * t[2] + 0.01);
+
+        final_t[0] += str_t * result_t[0];
+        final_t[1] += str_t * result_t[1];
+        final_t[2] += str_t * result_t[2];
+        str_all_t += str_t;
+        // std::printf("UUU t: %f %f %f %f\n", result_t[0], result_t[1], result_t[2], str_t);
+
+        // transformation of normal
+        n[0] = o.n0 - D3transform_[i].orig[0];
+        n[1] = o.n1 - D3transform_[i].orig[1];
+        n[2] = o.n2 - D3transform_[i].orig[2];
+
+        result_n[0] = D3transform_[i].simlar[0] * n[0] + D3transform_[i].simlar[1] * n[1] + D3transform_[i].simlar[2] * n[2];
+        result_n[1] = D3transform_[i].simlar[3] * n[0] + D3transform_[i].simlar[4] * n[1] + D3transform_[i].simlar[5] * n[2];
+        result_n[2] = D3transform_[i].simlar[6] * n[0] + D3transform_[i].simlar[7] * n[1] + D3transform_[i].simlar[8] * n[2];
+
+        result_n[0] = (i % 2) * grid_dim_x_ + (1 - (i % 2) * 2) * result_n[0];
+        result_n[1] = (i / 2) * grid_dim_y_ + (1 - (i / 2) * 2) * result_n[1];
+        if (i == 0 || i == 3)
+            result_n[2] = -result_n[2];
+
+        str_n = 1.0 / (n[0] * n[0] + n[1] * n[1] + n[2] * n[2] + 0.01);
+
+        final_n[0] += str_n * result_n[0];
+        final_n[1] += str_n * result_n[1];
+        final_n[2] += str_n * result_n[2];
+        str_all_n += str_n;
+        // std::printf("UUU n: %f %f %f %f\n", result_n[0], result_n[1], result_n[2], str_n);
     }
 
-    o.x = final[0] / str_all;
-    o.y = final[1] / str_all;
-    o.z = final[2] / str_all;
+    // mean of position
+    o.x = final_t[0] / str_all_t;
+    o.y = final_t[1] / str_all_t;
+    o.z = final_t[2] / str_all_t;
+
+    // mean of normal
+    o.n0 = final_n[0] / str_all_n;
+    o.n1 = final_n[1] / str_all_n;
+    o.n2 = final_n[2] / str_all_n;
 }
 
 void CTransformation::loadCalibration(const std::string &str)
@@ -381,7 +412,7 @@ SEllipseCenters CTransformation::calcEigen(const float *data)
         t2 = s2[i] * c2 * (s0[i] * L2 * c0z + s1[i] * L0 * c1z);
 
         // restrictions on orientations
-        if(n2 < 0 && t2 > 0)
+        if(n2 > 0 && t2 > 0)
         {
             n0 = s0[i] * c0x + s1[i] * c1x;
             n1 = s0[i] * c0y + s1[i] * c1y;
@@ -510,7 +541,7 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
     cv::normalize(axis_vec, axis_vec);
 
     float rot_angle = -std::acos(final_norm.dot(initial_norm));
-    //std::printf("rot_angle %.3f\n", rot_angle);
+    // std::printf("rot_angle %.3f\n", rot_angle);
     float s = std::sin(rot_angle / 2.0);
     float qx1 = axis_vec[0] * s;
     float qy1 = axis_vec[1] * s;
@@ -526,12 +557,12 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
         qw1 /= scale;
     }*/
 
-    obj.qx = qx1;
+    /* obj.qx = qx1;
     obj.qy = qy1;
     obj.qz = qz1;
-    obj.qw = qw1;
+    obj.qw = qw1;*/
 
-    std::printf("angle %f\n", obj.angle);
+    // std::printf("angle %f\n", obj.angle);
     s = std::sin(obj.angle / 2.0);
     float qx2 = final_norm[0] * s;
     float qy2 = final_norm[1] * s;

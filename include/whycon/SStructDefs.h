@@ -49,7 +49,7 @@ typedef struct
     float x, y, z, d;           // position and distance in the camera coords
     float roll, pitch, yaw;     // fixed axis angles
     float angle;                // axis angle around marker's surface normal
-    float n0, n1, n2;           // marker surface normal pointing the camera
+    float n0, n1, n2;           // marker surface normal pointing from the camera
     float qx, qy, qz, qw;       // quaternion
     // ??? not used float roundness;            // segment roundness as calculated by 5 of [1]
     // ??? not used float bwratio;              // black/white area ratio
@@ -68,7 +68,7 @@ typedef struct
 typedef struct
 {
     float orig[3];      // translation {x, y, z}
-    float simlar[9];    // rotation description
+    float simlar[9];    // rotation description, similarity transformation matrix
 } S3DTransform;
 
 typedef struct
