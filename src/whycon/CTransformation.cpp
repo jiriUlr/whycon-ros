@@ -336,19 +336,19 @@ S3DTransform CTransformation::calibrate3D(const STrackedObject &o0, const STrack
     // float scale = 1.0;
     /* v[3] = {x, y, z} */
     float v0[3] = {o1.x - o0.x, o1.y - o0.y, o1.z - o0.z};
-    /*scale = sqrt(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);
+    /* scale = sqrt(v0[0] * v0[0] + v0[1] * v0[1] + v0[2] * v0[2]);
     v0[0] /= scale;
     v0[1] /= scale;
     v0[2] /= scale;*/
 
     float v1[3] = {o2.x - o0.x, o2.y - o0.y, o2.z - o0.z};
-    /*scale = sqrt(v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2]);
+    /* scale = sqrt(v1[0] * v1[0] + v1[1] * v1[1] + v1[2] * v1[2]);
     v1[0] /= scale;
     v1[1] /= scale;
     v1[2] /= scale;*/
 
     float v2[3] = {v0[1] * v1[2] - v1[1] * v0[2], v0[2] * v1[0] - v1[2] * v0[0], v0[0] * v1[1] - v1[0] * v0[1]};
-    /*scale = sqrt(v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2]);
+    /* scale = sqrt(v2[0] * v2[0] + v2[1] * v2[1] + v2[2] * v2[2]);
     v2[0] /= scale;
     v2[1] /= scale;
     v2[2] /= scale;*/
@@ -370,7 +370,6 @@ S3DTransform CTransformation::calibrate3D(const STrackedObject &o0, const STrack
     result.simlar[7] = m23D(2, 1) * g_dim_x * g_dim_y;
     result.simlar[8] = m23D(2, 2) * g_dim_x * g_dim_y;
 
-    transform_type_ = TRANSFORM_3D;
     return result;
 }
 
@@ -503,16 +502,12 @@ SEllipseCenters CTransformation::calcSolutions(const SSegment segment)
 
 void CTransformation::transformCoordinates(STrackedObject &obj)
 {
-    /* transformation to camera-centric or user-defined coordinate frames */
+    // transformation to camera-centric or user-defined coordinate frames
     switch(transform_type_)
     {
         // 3D->2D homography, see 4.4.2 of [1]
         case TRANSFORM_2D:
         {
-            /*TODO note #09*/
-            //for debug only
-            //obj.x = x;
-            //obj.y = y;
             transform2D(obj);
             break;
         }
