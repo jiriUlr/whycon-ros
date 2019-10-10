@@ -93,13 +93,19 @@ void CTransformation::transformXY(float &x, float &y)
 
 void CTransformation::transform2D(STrackedObject &o)
 {
+    // transformation of position
     float x = hom_[0] * o.x + hom_[1] * o.y + hom_[2];
     float y = hom_[3] * o.x + hom_[4] * o.y + hom_[5];
     float z = hom_[6] * o.x + hom_[7] * o.y + hom_[8];
 
     o.x = x / z;
     o.y = y / z;
-    o.z = 0;
+    o.z = 0.0;
+
+    // zeroing normal because there's no need for it in 2D
+    o.n0 = 0.0;
+    o.n1 = 0.0;
+    o.n2 = 0.0;
 }
 
 void CTransformation::transform3D(STrackedObject &o, const int num)
