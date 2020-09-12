@@ -75,6 +75,10 @@ class CTransformation
         /* calculate RPY from quaternion */
         void calcEulerFromQuat(STrackedObject &obj);
 
+        void normalize_quaternion(float &qx1, float &qy1, float &qz1, float &qw1);
+        float quaternion_norm(float qx1, float qy1, float qz1, float qw1);
+        void conjugate_quaternion(float qx1, float qy1, float qz1, float qw1, float &qx2, float &qy2, float &qz2, float &qw2);
+        void hamilton_product(float qx1, float qy1, float qz1, float qw1, float qx2, float qy2, float qz2, float qw2, float &qx3, float &qy3, float &qz3, float &qw3);
         /* calculate the pattern 3D position from its ellipse characteristic equation, see 4.3 of [1] */
         SEllipseCenters calcEigen(const float *data);
 

@@ -1,8 +1,3 @@
-#include <cstdio>
-#include <cmath>
-
-#include "whycon/CTransformation.h"
-
 /*
  * File name: CTransformation.h
  * Date:      2014
@@ -11,6 +6,11 @@
  * Licence: if you use this class for your research, please cite [1].
  * References: [1] Krajnik, Nitsche et al.: A practical multirobot localization system. Journal of Intelligent and Robotic Systems, 2014.
  */
+
+#include <cstdio>
+#include <cmath>
+
+#include "whycon/CTransformation.h"
 
 namespace whycon
 {
@@ -216,6 +216,7 @@ void CTransformation::loadCalibration(const std::string &str)
         }
 
         fs.release();
+        calibrated_ = true;
     }
     catch(const std::exception& e)
     {
@@ -313,6 +314,7 @@ void CTransformation::calibrate2D(const STrackedObject *in, const float g_dim_x,
     hom_[8] = 1;
 
     transform_type_ = TRANSFORM_2D;
+    calibrated_ = true;
 }
 
 void CTransformation::calibrate3D(const STrackedObject *o, const float g_dim_x, const float g_dim_y)
@@ -324,6 +326,7 @@ void CTransformation::calibrate3D(const STrackedObject *o, const float g_dim_x, 
     grid_dim_x_ = g_dim_x;
     grid_dim_y_ = g_dim_y;
     transform_type_ = TRANSFORM_3D;
+    calibrated_ = true;
 }
 
 S3DTransform CTransformation::calibrate3D(const STrackedObject &o0, const STrackedObject &o1, const STrackedObject &o2, const float g_dim_x, const float g_dim_y)
@@ -443,7 +446,7 @@ SEllipseCenters CTransformation::calcEigen(const float *data)
 
             idx++;
 
-            // std::printf("calcEigen %d %.3f %.3f %.3f %.3f %.3f %.3f\n", idx, t0, t1, t2, n0, n1, n2);
+            // std::printf("calcEigen %d %.3f %.3f %.3f \t %.3f %.3f %.3f\n", idx - 1, t0, t1, t2, n0, n1, n2);
         }
     }
 
@@ -536,63 +539,108 @@ void CTransformation::calcOrientation(STrackedObject &obj)
 // https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
 void CTransformation::calcQuaternion(STrackedObject &obj)
 {
-    cv::Vec3f initial_norm(0.0, 0.0, 1.0);
-    cv::Vec3f final_norm(obj.n0, obj.n1, obj.n2);
+    // cv::Vec3f initial_norm(0.0, 0.0, 1.0);
+    // cv::Vec3f final_norm(obj.n0, obj.n1, obj.n2);
+    cv::Vec3f initial_norm(1.0, 0.0, 0.0);
+    cv::Vec3f final_norm(obj.n2, -obj.n0, -obj.n1);
+    cv::normalize(final_norm, final_norm);
+
     cv::Vec3f axis_vec = final_norm.cross(initial_norm);
     cv::normalize(axis_vec, axis_vec);
 
-    float rot_angle = -std::acos(final_norm.dot(initial_norm));
-    // std::printf("rot_angle %.3f\n", rot_angle);
+    // std::printf("final_norm %f %f %f\n", final_norm[0], final_norm[1], final_norm[2]);
+    // std::printf("axis_vec %f %f %f\n", axis_vec[0], axis_vec[1], axis_vec[2]);
+
+    float dot_pro = final_norm.dot(initial_norm);
+    // if(dot_pro > 1)
+    //     dot_pro = 1;
+    // else if(dot_pro < -1)
+    //     dot_pro = -1;
+    float rot_angle = -std::acos(dot_pro);
+    // std::printf("rot_angle %f\n", rot_angle);
+
     float s = std::sin(rot_angle / 2.0);
     float qx1 = axis_vec[0] * s;
     float qy1 = axis_vec[1] * s;
     float qz1 = axis_vec[2] * s;
     float qw1 = std::cos(rot_angle / 2.0);
+    // std::printf("q1 %f %f %f %f norm %f\n", qx1, qy1, qz1, qw1, quaternion_norm(qx1, qy1, qz1, qw1));
+    normalize_quaternion(qx1, qy1, qz1, qw1);
 
-    /* float scale = std::sqrt(qx1*qx1 + qy1*qy1 + qz1*qz1 + qw1*qw1);
-    std::printf("quat1 norm %.3f\n", scale);
-    if(std::fabs(scale - 1) > 1e-6){
-        qx1 /= scale;
-        qy1 /= scale;
-        qz1 /= scale;
-        qw1 /= scale;
-    }*/
+    // NOT USED
+    // float qx1c, qy1c, qz1c, qw1c;
+    // conjugate_quaternion(qx1, qy1, qz1, qw1, qx1c, qy1c, qz1c, qw1c);
+    // float tmp_qx, tmp_qy, tmp_qz, tmp_qw;
+    // hamilton_product(qx1, qy1, qz1, qw1, final_norm[0], final_norm[1], final_norm[2], 0.0, tmp_qx, tmp_qy, tmp_qz, tmp_qw);
+    // std::printf("qt %f %f %f %f norm %f\n", tmp_qx, tmp_qy, tmp_qz, tmp_qw, quaternion_norm(tmp_qx, tmp_qy, tmp_qz, tmp_qw));
+    // normalize_quaternion(tmp_qx, tmp_qy, tmp_qz, tmp_qw);
+    // float rot_x, rot_y, rot_z, rot_w;
+    // hamilton_product(tmp_qx, tmp_qy, tmp_qz, tmp_qw, qx1c, qy1c, qz1c, qw1c, rot_x, rot_y, rot_z, rot_w);
+    // std::printf("norm_surf_q %f %f %f %f norm %f\n", rot_x, rot_y, rot_z, rot_w, quaternion_norm(rot_x, rot_y, rot_z, rot_w));
+    // normalize_quaternion(rot_x, rot_y, rot_z, rot_w);
+    // final_norm[0] = rot_x;
+    // final_norm[1] = rot_y;
+    // final_norm[2] = rot_z;
 
-    /* obj.qx = qx1;
-    obj.qy = qy1;
-    obj.qz = qz1;
-    obj.qw = qw1;*/
-
-    // std::printf("angle %f\n", obj.angle);
-    s = std::sin(obj.angle / 2.0);
+    float new_angle = obj.angle + 0.2;
+    if(new_angle > M_PI)
+        new_angle = new_angle - 2 * M_PI;
+    // std::printf("angle %f new angle %f\n", obj.angle, new_angle);
+    s = std::sin(new_angle / 2.0);
     float qx2 = final_norm[0] * s;
     float qy2 = final_norm[1] * s;
     float qz2 = final_norm[2] * s;
-    float qw2 = std::cos(obj.angle / 2.0);
+    float qw2 = std::cos(new_angle / 2.0);
+    // std::printf("q2 %f %f %f %f norm %f\n", qx2, qy2, qz2, qw2, quaternion_norm(qx2, qy2, qz2, qw2));
+    normalize_quaternion(qx2, qy2, qz2, qw2);
 
-    /* scale = std::sqrt(qx2*qx2 + qy2*qy2 + qz2*qz2 + qw2*qw2);
-    std::printf("quat2 norm %f\n", scale);
-    if(std::fabs(scale - 1) > 1e-6){
-        qx2 /= scale;
-        qy2 /= scale;
-        qz2 /= scale;
-        qw2 /= scale;
-    }*/
+    float qx3, qy3, qz3, qw3;
+    hamilton_product(qx2, qy2, qz2, qw2, qx1, qy1, qz1, qw1, qx3, qy3, qz3, qw3);
+    // std::printf("q3 %f %f %f %f norm %f\n", qx3, qy3, qz3, qw3, quaternion_norm(qx3, qy3, qz3, qw3));
+    normalize_quaternion(qx3, qy3, qz3, qw3);
 
-    /* Hamilton product: at first applying q1 and then rotation q2 */
-    obj.qx = qw2 * qx1 + qx2 * qw1 + qy2 * qz1 - qz2 * qy1;
-    obj.qy = qw2 * qy1 - qx2 * qz1 + qy2 * qw1 + qz2 * qx1;
-    obj.qz = qw2 * qz1 + qx2 * qy1 - qy2 * qx1 + qz2 * qw1;
-    obj.qw = qw2 * qw1 - qx2 * qx1 - qy2 * qy1 - qz2 * qz1;
+    // std::printf("\n");
+    
+    obj.qx = qx3;
+    obj.qy = qy3;
+    obj.qz = qz3;
+    obj.qw = qw3;
+}
 
-    /* scale = std::sqrt(obj.qx*obj.qx + obj.qy*obj.qy + obj.qz*obj.qz + obj.qw*obj.qw);
-    std::printf("quatFin norm %f\n", scale);
-    if(std::fabs(scale - 1) > 1e-6){
-        obj.qx /= scale;
-        obj.qy /= scale;
-        obj.qz /= scale;
-        obj.qw /= scale;
-    }*/
+/* Hamilton product of two quaternions. Q1 is then the resulting quaternion */
+void CTransformation::hamilton_product(float qx1, float qy1, float qz1, float qw1, float qx2, float qy2, float qz2, float qw2, float &qx3, float &qy3, float &qz3, float &qw3)
+{
+    qx3 = qw1 * qx2 + qx1 * qw2 + qy1 * qz2 - qz1 * qy2;
+    qy3 = qw1 * qy2 - qx1 * qz2 + qy1 * qw2 + qz1 * qx2;
+    qz3 = qw1 * qz2 + qx1 * qy2 - qy1 * qx2 + qz1 * qw2;
+    qw3 = qw1 * qw2 - qx1 * qx2 - qy1 * qy2 - qz1 * qz2;
+}
+
+/* Quaternion conjugation. Q2 is then the result */
+void CTransformation::conjugate_quaternion(float qx1, float qy1, float qz1, float qw1, float &qx2, float &qy2, float &qz2, float &qw2)
+{
+    qx2 = -qx1;
+    qy2 = -qy1;
+    qz2 = -qz1;
+    qw2 = qw1;
+}
+
+float CTransformation::quaternion_norm(float qx1, float qy1, float qz1, float qw1)
+{
+    float norm = std::sqrt(qx1 * qx1 + qy1 * qy1 + qz1 * qz1 + qw1 * qw1);
+    return norm;
+}
+
+void CTransformation::normalize_quaternion(float &qx1, float &qy1, float &qz1, float &qw1)
+{
+    float norm = quaternion_norm(qx1, qy1, qz1, qw1);
+    if(std::fabs(norm - 1.0) > 1e-8)
+    {
+        qx1 /= norm;
+        qy1 /= norm;
+        qz1 /= norm;
+        qw1 /= norm;
+    }
 }
 
 // https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
