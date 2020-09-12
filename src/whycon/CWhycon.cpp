@@ -91,8 +91,8 @@ void CWhycon::saveCalibration(std::string& path)
 
 void CWhycon::selectMarker(float x, float y)
 {
-    if(mancalibrate_)
-    {
+    // if(mancalibrate_)
+    // {
         if (calib_num_ < 4 && calib_step_ > calibration_steps_)
         {
             calib_step_ = 0;
@@ -105,11 +105,11 @@ void CWhycon::selectMarker(float x, float y)
             current_marker_array_[0].seg.valid = true;
             detector_array_[0]->localSearch = true;
         }
-    }
-    else
-    {
+    // }
+    // else
+    // {
 
-    }
+    // }
 }
 
 /*manual calibration can be initiated by pressing 'r'
@@ -303,7 +303,7 @@ void CWhycon::processImage(CRawImage *image, std::vector<SMarker> &whycon_detect
     {
         autoCalib();
     }
-    if (mancalibrate_ && calib_num_ < 4)
+    if (calib_num_ < 4)
     {
         manualCalib();
     }

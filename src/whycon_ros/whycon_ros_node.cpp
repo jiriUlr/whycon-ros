@@ -167,9 +167,9 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
         marker.angle = detection.obj.angle;
 
         // Convert to ROS standard Coordinate System
-        marker.position.position.x = -detection.obj.y;
-        marker.position.position.y = -detection.obj.z;
-        marker.position.position.z = detection.obj.x;
+        marker.position.position.x = detection.obj.x;
+        marker.position.position.y = detection.obj.y;
+        marker.position.position.z = detection.obj.z;
         marker.position.orientation.x = detection.obj.qx;
         marker.position.orientation.y = detection.obj.qy;
         marker.position.orientation.z = detection.obj.qz;
@@ -186,9 +186,9 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
             transform_stamped.header.stamp = ros::Time::now();
             transform_stamped.header.frame_id = msg->header.frame_id;
             transform_stamped.child_frame_id = "marker_" + std::to_string(detection.seg.ID);
-            transform_stamped.transform.translation.x = -detection.obj.y;
-            transform_stamped.transform.translation.y = -detection.obj.z;
-            transform_stamped.transform.translation.z = detection.obj.x;
+            transform_stamped.transform.translation.x = detection.obj.x;
+            transform_stamped.transform.translation.y = detection.obj.y;
+            transform_stamped.transform.translation.z = detection.obj.z;
             transform_stamped.transform.rotation.x = detection.obj.qx;
             transform_stamped.transform.rotation.y = detection.obj.qy;
             transform_stamped.transform.rotation.z = detection.obj.qz;
@@ -207,16 +207,16 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
             visual_marker.type = visualization_msgs::Marker::SPHERE;
             visual_marker.action = visualization_msgs::Marker::MODIFY;
 
-            visual_marker.pose.position.x = -detection.obj.y;
-            visual_marker.pose.position.y = -detection.obj.z;
-            visual_marker.pose.position.z = detection.obj.x;
+            visual_marker.pose.position.x = detection.obj.x;
+            visual_marker.pose.position.y = detection.obj.y;
+            visual_marker.pose.position.z = detection.obj.z;
             visual_marker.pose.orientation.x = detection.obj.qx;
             visual_marker.pose.orientation.y = detection.obj.qy;
             visual_marker.pose.orientation.z = detection.obj.qz;
             visual_marker.pose.orientation.w = detection.obj.qw;
 
-            visual_marker.scale.x = 0.5;//circleDiameter;  // meters
-            visual_marker.scale.y = 0.25;//circleDiameter;
+            visual_marker.scale.x = 0.2;//circleDiameter;  // meters
+            visual_marker.scale.y = 0.2;//circleDiameter;
             visual_marker.scale.z = 0.01;
             visual_marker.color.r = 0.0;
             visual_marker.color.g = 1.0;
