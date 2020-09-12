@@ -43,20 +43,16 @@ void CRawImage::drawTimeStats(int eval_time, int num_markers)
     char text[100];
     std::sprintf(text, "Found %i markers in %.3f ms", num_markers, eval_time / 1000.0);
 
-    int font_face = cv::FONT_HERSHEY_SIMPLEX;
-    double font_scale = 1;
+    int font_face = cv::FONT_HERSHEY_SIMPLEX;//DUPLEX;
+    double font_scale = 0.5;
     int thickness = 1;
     int baseline = 0;
-    cv::Scalar text_color(255, 0, 0);
-    cv::Scalar rect_color(0, 0, 0);
 
     cv::Size text_size = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
-    cv::Point text_pos(0, text_size.height);
-    cv::Point text_pos_opp(text_size.width, 0);
 
-    cv::rectangle(img, text_pos, text_pos_opp, rect_color, cv::FILLED);
+    cv::rectangle(img, cv::Point(0, text_size.height + 3), cv::Point(text_size.width, 0), cv::Scalar(0, 0, 0), cv::FILLED);
 
-    cv::putText(img, text, text_pos, font_face, font_scale, text_color, thickness);
+    cv::putText(img, text, cv::Point(0, text_size.height + 1), font_face, font_scale, cv::Scalar(255, 0, 0), thickness, cv::LINE_AA);
 }
 
 void CRawImage::drawStats(SMarker &marker, bool trans_2D)
@@ -64,8 +60,8 @@ void CRawImage::drawStats(SMarker &marker, bool trans_2D)
     cv::Mat img(height_, width_, CV_8UC(bpp_), (void*)data_);
     char text[100];
 
-    int font_face = cv::FONT_HERSHEY_SIMPLEX;
-    double font_scale = 1;
+    int font_face = cv::FONT_HERSHEY_SIMPLEX;//DUPLEX;
+    double font_scale = 0.5;
     int thickness = 1;
     int baseline = 0;
     cv::Scalar color(255, 0, 0);
@@ -77,7 +73,7 @@ void CRawImage::drawStats(SMarker &marker, bool trans_2D)
 
     cv::Size text_size0 = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
     cv::Point text_pos0(marker.seg.minx - 30, marker.seg.maxy + text_size0.height);
-    cv::putText(img, text, text_pos0, font_face, font_scale, color, thickness);
+    cv::putText(img, text, text_pos0, font_face, font_scale, color, thickness, cv::LINE_AA);
 
     if(trans_2D)
         std::sprintf(text, "%02i %03i", marker.seg.ID, (int)(marker.obj.yaw / M_PI * 180));
@@ -86,7 +82,7 @@ void CRawImage::drawStats(SMarker &marker, bool trans_2D)
 
     cv::Size text_size1 = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
     cv::Point text_pos1(marker.seg.minx - 30, marker.seg.maxy + 2 * text_size1.height + 5);
-    cv::putText(img, text, text_pos1, font_face, font_scale, color, thickness);
+    cv::putText(img, text, text_pos1, font_face, font_scale, color, thickness, cv::LINE_AA);
 }
 
 void CRawImage::drawGuideCalibration(int calib_num, float dim_x, float dim_y)
