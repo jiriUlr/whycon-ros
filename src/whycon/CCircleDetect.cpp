@@ -533,7 +533,7 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
     }
 
     // drawing results 
-    if (outer.valid)
+    if (outer.valid && false)
     {
         for (int p = queueOldStart; p < queueEnd; p++)
         {
@@ -671,7 +671,10 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         sx = sy = 0;
         numPoints[i] = 0;
         if (smooth[i][idSamples - 1] != smooth[i][0])
+        {
             sx = 1;
+            numPoints[i] = 1;
+        }
         for (int a = 1; a < idSamples; a++)
         {
             if (smooth[i][a] != smooth[i][a - 1])
@@ -705,6 +708,7 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
             }
         }
         variance[i] = sum[i] / numPoints[i];
+        printf("idx %d var %f sum %f numPoints %f\n", i, variance[i], sum[i], numPoints[i]);
 
         //determine raw code
         for (int a = 0; a < idBits * 2; a++)
@@ -717,6 +721,7 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         segIdx = 0;
     else
         segIdx = 1;
+    printf("solution %d\n\n", segIdx);
 
     tracked_object.u = ellipse_centers.u[segIdx];
     tracked_object.v = ellipse_centers.v[segIdx];
