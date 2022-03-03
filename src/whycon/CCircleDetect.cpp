@@ -7,8 +7,12 @@
 namespace whycon
 {
 
-int* CCircleDetect::buffer = NULL;
-int* CCircleDetect::queue = NULL;
+// int* CCircleDetect::buffer = NULL;
+// int* CCircleDetect::queue = NULL;
+
+std::unique_ptr<int> CCircleDetect::buffer = std::unique_ptr<int>();
+std::unique_ptr<int> CCircleDetect::queue = std::unique_ptr<int>();
+
 
 
 //Variable initialization
@@ -42,11 +46,13 @@ CCircleDetect::CCircleDetect(int wi, int he, bool id, int bits, int samples, boo
     //initialization - fixed params
     len = width * height;
     ownBuffer = false;
-    if (buffer == NULL)
+    if(!buffer)// (buffer == NULL)
     {
         ownBuffer = true;
-        buffer = (int*)malloc(len * sizeof (int));
-        queue = (int*)malloc(len * sizeof (int));
+        // buffer = (int*)malloc(len * sizeof (int));
+        // queue = (int*)malloc(len * sizeof (int));
+        buffer.reset((int*)malloc(len * sizeof (int)));
+        queue.reset((int*)malloc(len * sizeof (int)));
         SSegment dummy;
         bufferCleanup(dummy);
     }
@@ -69,26 +75,28 @@ void CCircleDetect::reconfigure(float ict, float fct, float art, float cdtr, flo
     identify = id;
 }
 
-int CCircleDetect::adjustDimensions(int wi, int he)
+void CCircleDetect::adjustDimensions(int wi, int he)
 {
     width = wi;
     height = he;
     len = width * height;
-    free(buffer);
-    free(queue);
-    buffer = (int*)malloc(len * sizeof (int));
-    queue = (int*)malloc(len * sizeof (int));
+    // free(buffer);
+    // free(queue);
+    // buffer = (int*)malloc(len * sizeof (int));
+    // queue = (int*)malloc(len * sizeof (int));
+    buffer.reset((int*)malloc(len * sizeof (int)));
+    queue.reset((int*)malloc(len * sizeof (int)));
     SSegment dummy;
     bufferCleanup(dummy);
 }
 
 CCircleDetect::~CCircleDetect()
 {
-    if (ownBuffer)
-    {
-        free(buffer);
-        free(queue);
-    }
+    // if (ownBuffer)
+    // {
+    //     free(buffer);
+    //     free(queue);
+    // }
 }
 
 bool CCircleDetect::changeThreshold()
@@ -113,10 +121,10 @@ bool CCircleDetect::examineSegment(CRawImage *image, SSegment *segmen, int ii, f
     int position = 0;
     int pos;
     bool result = false;
-    int type = buffer[ii];
+    int type = buffer.get()[ii];
     int maxx, maxy, minx, miny;
 
-    buffer[ii] = ++numSegments;
+    buffer.get()[ii] = ++numSegments;
     segmen->x = ii % width;
     segmen->y = ii / width;
     minx = maxx = segmen->x;
@@ -124,60 +132,60 @@ bool CCircleDetect::examineSegment(CRawImage *image, SSegment *segmen, int ii, f
     segmen->valid = false;
     segmen->round = false;
     //push segment coords to the queue
-    queue[queueEnd++] = ii;
+    queue.get()[queueEnd++] = ii;
     //and until queue is empty
     while (queueEnd > queueStart)
     {
         //pull the coord from the queue
-        position = queue[queueStart++];
+        position = queue.get()[queueStart++];
         //search neighbours
         pos = position + 1;
-        if (buffer[pos] == 0)
+        if (buffer.get()[pos] == 0)
         {
             ptr = &image->data_[pos * step];
-            buffer[pos] = (ptr[0] > threshold) - 2;
+            buffer.get()[pos] = (ptr[0] > threshold) - 2;
         }
-        if (buffer[pos] == type)
+        if (buffer.get()[pos] == type)
         {
-            queue[queueEnd++] = pos;
+            queue.get()[queueEnd++] = pos;
             maxx = max(maxx, pos % width);
-            buffer[pos] = numSegments;
+            buffer.get()[pos] = numSegments;
         }
         pos = position - 1;
-        if (buffer[pos] == 0)
+        if (buffer.get()[pos] == 0)
         {
             ptr = &image->data_[pos * step];
-            buffer[pos] = (ptr[0] > threshold) - 2;
+            buffer.get()[pos] = (ptr[0] > threshold) - 2;
         }
-        if (buffer[pos] == type)
+        if (buffer.get()[pos] == type)
         {
-            queue[queueEnd++] = pos;
+            queue.get()[queueEnd++] = pos;
             minx = min(minx, pos % width);
-            buffer[pos] = numSegments;
+            buffer.get()[pos] = numSegments;
         }
         pos = position - width;
-        if (buffer[pos] == 0)
+        if (buffer.get()[pos] == 0)
         {
             ptr = &image->data_[pos * step];
-            buffer[pos] = (ptr[0] > threshold) - 2;
+            buffer.get()[pos] = (ptr[0] > threshold) - 2;
         }
-        if (buffer[pos] == type)
+        if (buffer.get()[pos] == type)
         {
-            queue[queueEnd++] = pos;
+            queue.get()[queueEnd++] = pos;
             miny = min(miny, pos / width);
-            buffer[pos] = numSegments;
+            buffer.get()[pos] = numSegments;
         }
         pos = position + width;
-        if (buffer[pos] == 0)
+        if (buffer.get()[pos] == 0)
         {
             ptr = &image->data_[pos * step];
-            buffer[pos] = (ptr[0] > threshold) - 2;
+            buffer.get()[pos] = (ptr[0] > threshold) - 2;
         }
-        if (buffer[pos] == type)
+        if (buffer.get()[pos] == type)
         {
-            queue[queueEnd++] = pos;
+            queue.get()[queueEnd++] = pos;
             maxy = max(maxy, pos / width);
-            buffer[pos] = numSegments;
+            buffer.get()[pos] = numSegments;
         }
     }
 
@@ -204,7 +212,7 @@ bool CCircleDetect::examineSegment(CRawImage *image, SSegment *segmen, int ii, f
             segmen->mean = 0;
             for (int p = queueOldStart; p < queueEnd; p++)
             {
-                pos = queue[p];
+                pos = queue.get()[p];
                 segmen->mean += image->data_[pos * step];
             }
             segmen->mean = segmen->mean / segmen->size;
@@ -219,16 +227,16 @@ void CCircleDetect::bufferCleanup(SSegment init)
     int pos = (height - 1) * width;
     if (init.valid == false || track == false || lastTrackOK == false)
     {
-        memset(buffer, 0, sizeof(int) * len);
+        memset(buffer.get(), 0, sizeof(int) * len);
         for (int i = 0; i < width; i++)
         {
-            buffer[i] = -1000;
-            buffer[pos + i] = -1000;
+            buffer.get()[i] = -1000;
+            buffer.get()[pos + i] = -1000;
         }
         for (int i = 0; i < height; i++)
         {
-            buffer[width * i] = -1000;
-            buffer[width * i + width - 1] = -1000;
+            buffer.get()[width * i] = -1000;
+            buffer.get()[width * i + width - 1] = -1000;
         }
     }
     else
@@ -241,7 +249,7 @@ void CCircleDetect::bufferCleanup(SSegment init)
         for (int y = iy; y < ay; y++)
         {
             pos = y * width;
-            for (int x = ix; x < ax; x++) buffer[pos + x] = 0;
+            for (int x = ix; x < ax; x++) buffer.get()[pos + x] = 0;
         }
     }
 }
@@ -305,12 +313,12 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
     }
     while (cont) 
     {
-        if (buffer[ii] == 0)
+        if (buffer.get()[ii] == 0)
         {
             ptr = &image->data_[ii * step];
-            if (ptr[0] < threshold) buffer[ii] = -2;
+            if (ptr[0] < threshold) buffer.get()[ii] = -2;
         }
-        if (buffer[ii] == -2)
+        if (buffer.get()[ii] == -2)
         {
             //new segment found
             queueEnd = 0;
@@ -319,12 +327,12 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
             if (examineSegment(image, &outer, ii, outerAreaRatio))
             {
                 pos = outer.y * image->width_ + outer.x;
-                if (buffer[pos] == 0)
+                if (buffer.get()[pos] == 0)
                 {
                     ptr = &image->data_[pos * step];
-                    buffer[pos]= (ptr[0] >= threshold) - 2;
+                    buffer.get()[pos]= (ptr[0] >= threshold) - 2;
                 }   
-                if (buffer[pos] == -1)
+                if (buffer.get()[pos] == -1)
                 {
                     if (examineSegment(image,&inner,pos,innerAreaRatio))
                     {
@@ -344,7 +352,7 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
 
                                 for (int p = queueOldStart; p < queueEnd; p++)
                                 {
-                                    pos = queue[p];
+                                    pos = queue.get()[p];
                                     tx = pos % image->width_;
                                     ty = pos / image->width_;
                                     six += tx;
@@ -359,7 +367,7 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
 
                                 for (int p = 0; p < queueOldStart; p++)
                                 {
-                                    pos = queue[p];
+                                    pos = queue.get()[p];
                                     tx = pos % image->width_;
                                     ty = pos / image->width_;
                                     six += tx;
@@ -537,7 +545,7 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
     {
         for (int p = queueOldStart; p < queueEnd; p++)
         {
-            pos = queue[p];
+            pos = queue.get()[p];
             image->data_[step * pos + 0] = 0;
             image->data_[step * pos + 1] = 0;
             image->data_[step * pos + 2] = 0;
@@ -550,7 +558,7 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
         {
             for (int p = 0; p < queueOldStart; p++)
             {
-                pos = queue[p];
+                pos = queue.get()[p];
                 image->data_[step * pos + 0] = 255;
                 image->data_[step * pos + 1] = 255;
                 image->data_[step * pos + 2] = 200;
@@ -708,7 +716,7 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
             }
         }
         variance[i] = sum[i] / numPoints[i];
-        printf("idx %d var %f sum %f numPoints %f\n", i, variance[i], sum[i], numPoints[i]);
+        // printf("idx %d var %f sum %f numPoints %f\n", i, variance[i], sum[i], numPoints[i]);
 
         //determine raw code
         for (int a = 0; a < idBits * 2; a++)
@@ -721,7 +729,7 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         segIdx = 0;
     else
         segIdx = 1;
-    printf("solution %d\n\n", segIdx);
+    // printf("solution %d\n\n", segIdx);
 
     tracked_object.u = ellipse_centers.u[segIdx];
     tracked_object.v = ellipse_centers.v[segIdx];

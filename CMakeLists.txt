@@ -15,7 +15,7 @@ find_package(OpenCV REQUIRED)
 
 generate_dynamic_reconfigure_options(cfg/whycon.cfg)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -O2 -march=native -ggdb")
+set(CMAKE_CXX_FLAGS "-std=c++11 -O2 -ggdb")
 
 #######################################
 ## Declare ROS messages and services ##

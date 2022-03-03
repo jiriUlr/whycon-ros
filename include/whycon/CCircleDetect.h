@@ -2,6 +2,7 @@
 #define WHYCON__CCIRCLEDETECT_H
 
 #include <math.h>
+#include <memory>
 #include "whycon/CRawImage.h"
 #include "whycon/CTransformation.h"
 #include "whycon/CNecklace.h"
@@ -54,7 +55,7 @@ class CCircleDetect {
         float normalizeAngle(float a);
 
         // adjust the dimensions of the image, when the image size changes
-        int adjustDimensions(int wi, int he);
+        void adjustDimensions(int wi, int he);
 
         void ambiguityAndObtainCode(CRawImage *image);
         void ambiguityPlain();
@@ -102,8 +103,10 @@ class CCircleDetect {
         int tima, timb, timc, timd, sizer, sizerAll;
         float diameterRatio;
         bool ownBuffer;
-        static int *buffer;
-        static int *queue;
+        // static int *buffer;
+        // static int *queue;
+        static std::unique_ptr<int> buffer;
+        static std::unique_ptr<int> queue;
         // static int *mask;
         // static int maskNum;
         float idx[MAX_PATTERNS];
