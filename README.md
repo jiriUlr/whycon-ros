@@ -14,7 +14,7 @@ _WhyCon-orig_ is WhyCon's original, minimalistic version that was supposed to be
 |[![WhyCon applications](https://raw.githubusercontent.com/wiki/gestom/WhyCon/pics/whycon.png)](https://www.youtube.com/watch?v=KgKrN8_EmUA"AAAA")|-precise docking to a charging station (EU project STRANDS),<br/> -fitness evaluation for self-evolving robots (EU proj. SYMBRION),<br/>-relative localization of UAV-UGV formations (CZ-USA project COLOS),<br/>-energy source localization in (EU proj REPLICATOR),<br/>-robotic swarm localization (EU proj HAZCEPT).|
 
 The _WhyCon_ system was developed as a joint project between the University of Buenos Aires, Czech Technical University and University of Lincoln, UK.
-The main contributors were [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao), [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) and [Jan Faigl](https://scholar.google.co.uk/citations?user=-finD_sAAAAJ&hl=en). Each of these contributors maintains a slightly different version of WhyCon.
+The main contributors were [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao), [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) and [Jan Faigl](https://scholar.google.co.uk/citations?user=-finD_sAAAAJ&hl=en). Further contributors are [Peter Lightbody](https://scholar.google.com/citations?user=tBUM-8oAAAAJ&hl=cs&oi=ao) and [Jiří Ulrich](https://scholar.google.com/citations?hl=cs&user=vMtZ5FcAAAAJ). Each of these contributors maintains a slightly different version of WhyCon.
 
 | WhyCon version  | Application | Main features | Maintainer|
 | --------------- | ----------- | ------ | ----- |
@@ -35,75 +35,45 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 
 #### Quick setup for initial testing
 
-0. Have ROS Kinetic and appropriate camera driver installed. Also have a <a href="http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration">calibrated camera</a> with distortion model "plumb bob".
-1. Install the required <a href="#dependencies">libraries</a>
-```
-sudo apt-get install libsdl1.2-dev libsdl-ttf2.0-dev libncurses5-dev graphicsmagick-libmagick-dev-compat
-```
+0. Have ROS Noetic and appropriate camera driver installed. Also have a <a href="http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration">calibrated camera</a> with distortion model "plumb bob".
+1. Check the required <a href="#dependencies">libraries</a>
 2. Download the code from GitHub into a catkin workspace.
 3. Compile the code - just type `catkin_make` in workspace directory.
 4. Source setup script in package directory into shell enviroment e.g. `source devel/setup.bash`
 5. Download, resize and print one circular <a href="id/test.pdf">pattern</a> - you have the pattern also in the <i>id/test.pdf</i> file.
 6. Run code by <i>roslaunch</i> and remap subsribed camera topics either on start up through arguments
 ```
-roslaunch whycon_ros whycon.launch camInfo:=/<camera>/camera_info camRaw:=/<camera>/image_raw
+roslaunch whycon whycon.launch cam_info:=<camera_info_topic> cam_raw:=<camera_image_raw_topic>
 ```
-or rewrite file <a href="launch/whycon.launch">whycon.launch</a> so default values of tags <i>arg</i> called <i>camInfo</i> and <i>camRaw</i> will match topics <i>camera_info</i> and <i>image_raw</i>. Then it's just
+or rewrite file <a href="launch/whycon.launch">whycon.launch</a> so default values of tags <i>arg</i> called <i>cam_info</i> and <i>cam_raw</i> will match topics <i>camera_info</i> and <i>image_raw</i>. Then it's just
 ```
-roslaunch whycon_ros whycon.launch
+roslaunch whycon whycon.launch
 ```
 7. If using patterns with encoded ID keep the option <i>identify</i> turned on in <i>rqt_reconfigure</i> and if without ID, then turn it off!!!
-8. You should see the image with some numbers below the circle. Pressing <i>D</i> shows the segmentation result.
-9. You can change the parameters in <i>rqt_reconfigure</i> which should open together with whycon GUI.
+9. You can dynamically change the parameters in <i>rqt_reconfigure</i>.
 
 #### Generating tags with ID
 
-1. Folder <a href="id/">id/</a> contains code which generates tags with IDs.
-2. Move to the <i>id</i> folder and type `make`.
+1. see [whycode-gen](https://github.com/jiriUlr/whycode-gen)
 2. Run `./whycon-id-gen` followed by a number of bits and it will create tags in the working directory.
 3. Other program parameters are specified in help `./whycon-id-gen -h`
-4. Number of ID bits has to be then passed to whycon on start up. The default value is 5.
+4. Number of ID bits has to be then passed to whycon on start up. The default value can be set in the launch file.
 ```
-roslaunch whycon_ros whycon.launch [...] idBits:=...
+roslaunch whycon whycon.launch [...] id_bits:=...
 ```
-5. Other ID parameters are treated the same way. ID samples as `idSamples:=...` and Hamming distance as `hammingDist:=...`
+5. Other ID parameters are treated the same way. ID samples as `id_samples:=...` and Hamming distance as `hamming_dist:=...`
 
 #### Setting up the coordinate system
 
 1. If you have resized the markers (their default size is 122mm), then adjust their diameter in the <i>rqt_reconfigure</i>.
 2. Print additional four circular <a href="id/test.pdf">markers</a> and place to the corners of your (reclangular) operational space.
 3. Position and fixate your camera so that it has all four circles in it's field of view.
-4. Run whycon and modify the dimensions of the operation space in the <i>rqt_reconfigure</i> - the system will now assume that the four markers are at positions [0,0],[fieldLength,0], [0,fieldWidth],[fieldLength,fieldWidth]. 
-5. Adjust the parameter <i>numBots</i> - the number of patterns you want to track plus 4.
-6. Once all the patterns are found, press `a` and the four outermost patterns will be used to calculate the coordinate system.
-7. Alternatively, you can press `r` and then click the four circles that define the coordinate system.
-8. Pressing 1 should show you the patterns' positions in camera-centric coordinates (x-axis equals to camera optical axis), pressing 2 and 3 will display marker coordinates in user-defined 2D or 3D coordinate systems.
-9. Pressing `+`,`-` changes the number of localized patterns.
-
-#### Logs, GUI, recording topics
-
-1. GUI can be omitted by passing argument `useGui:=false` at strat up.
-2. Video and communication topics can be save using <i>rosbag</i>.
+4. Run whycon and modify the dimensions of the operation space in the <i>rqt_reconfigure</i> - the system will now assume that the four markers are at positions [0,0],[fieldLength,0], [0,fieldWidth],[fieldLength,fieldWidth].
+5. Start autocalibration or manual calibration through GUI or through rosservice tool.
 
 #### GUI key binding
 
-- `h` - show/hide help
-- `+` - increase the number of tracked patterns
-- `-` - decrease the number of tracked patterns
-- `1` - camera coordinate system
-- `2` - planar coordinate system
-- `3` - 3D coordinate system
-- `l` - draw/hide coordinates
-- `d` - draw/hide segmentation outcome and print debug info
-- `s` - save current image
-- `a` - autocalibration (searches for 4 outermost patterns and uses them to establisht the coordinate system)
-- `r` - manual calibration (click the 4 calibration patterns with mouse)
-- `ESC` - exit WhyCon
-
-- Individual patterns to be tracked can be selected by a mouse click.
-- `m` and `n` are recommended to use only with one tracked pattern.
-- `m` - prints camera coords and eigenvalues of the first pattern
-- `n` - prints image coords and eigenvalues of the first pattern
+- see [rqt-whycon-ros](https://github.com/jiriUlr/rqt-whycon-ros)
 
 #### Topics
 ##### Published
@@ -123,21 +93,16 @@ roslaunch whycon_ros whycon.launch [...] idBits:=...
 #### Some additional remarks
 
 1. At this point, you can start experimenting with the syste by adding whatever features you might think useful.
-2. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao)
+2. The code is avaiable only for academic, educational, research, and non-profit useage. In any other case or when You are not sure, please, contact us!
+2. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Jiří Ulrich](https://scholar.google.com/citations?user=vMtZ5FcAAAAJ&hl=cs&oi=ao)
 3. If you use this localization system for your research, please don't forget to cite at least one relevant paper from these [bibtex](http://raw.githubusercontent.com/wiki/gestom/CosPhi/papers/WhyCon.bib) records.
-4. Have fun!
-</ol>
 
 <hr>
 
 ### <a name="dependencies">Dependencies</a>
 
-All the following libraries are probably in your packages.
-
-1. <b>libsdl1.2-dev</b> for graphical user interface.
-2. <b>libsdl-ttf2.0-dev</b> to print stuff in the GUI.
-3. <b>libncurses5-dev</b> to print stuff on the terminal.
-4. <b>graphicsmagick-libmagick-dev-compat</b> to generate IDs.
+- OpenCV
+- ROS basic packages (see <a href="package.xml">package.xml</a>)
 
 ### References
 
@@ -152,4 +117,3 @@ All the following libraries are probably in your packages.
 The development of this work is currently supported by the Czech Science Foundation project 17-27006Y _STRoLL_.
 In the past, the work was supported by EU within its Seventh Framework Programme project ICT-600623 _STRANDS_.
 The Czech Republic and Argentina have given support through projects 7AMB12AR022, ARC/11/11 and 13-18316P.
-We sincerely acknowledge [Jean Pierre Moreau](http://jean-pierre.moreau.pagesperso-orange.fr/infos.html) for his excellent libraries for numerical analysis that we use in our project. 
