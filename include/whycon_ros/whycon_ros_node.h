@@ -15,6 +15,7 @@
 #include "whycon/SetCalibPath.h"
 #include "whycon/SetCoords.h"
 #include "whycon/SetDrawing.h"
+#include "whycon/GetGuiSettings.h"
 
 #include "whycon/whycon.h"
 
@@ -26,6 +27,8 @@ class CWhyconROSNode
 {
 
     public:
+        bool getGuiSettingsCallback(whycon::GetGuiSettings::Request &req, whycon::GetGuiSettings::Response &res);
+
         bool setDrawingCallback(whycon::SetDrawing::Request& req, whycon::SetDrawing::Response& res);
 
         bool setCoordsCallback(whycon::SetCoords::Request& req, whycon::SetCoords::Response& res);
@@ -63,6 +66,7 @@ class CWhyconROSNode
         ros::ServiceServer coord_system_srv_;
         ros::ServiceServer calib_method_srv_;
         ros::ServiceServer select_marker_srv_;
+        ros::ServiceServer gui_settings_srv_;
         
         bool publish_visual_;   // whether to publish visualization msgs
         bool use_gui_;          // generate images for graphic interface?

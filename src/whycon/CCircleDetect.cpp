@@ -541,7 +541,7 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
     }
 
     // drawing results 
-    if (outer.valid && false)
+    if (outer.valid)
     {
         for (int p = queueOldStart; p < queueEnd; p++)
         {

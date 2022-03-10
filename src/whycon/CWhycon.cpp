@@ -1,9 +1,25 @@
 #include <stdexcept>
+#include <stdio.h>
 
 #include "whycon/CWhycon.h"
 
 namespace whycon
 {
+
+bool CWhycon::getDrawCoords()
+{
+    return draw_coords_;
+}
+
+bool CWhycon::getDrawSegments()
+{
+    return draw_segments_;
+}
+
+int CWhycon::getCoordinates()
+{
+    return trans_->getTransformType();
+}
 
 void CWhycon::setDrawing(bool draw_coords, bool draw_segments)
 {
@@ -152,6 +168,8 @@ void CWhycon::manualCalib()
                 num_markers_ = was_markers_;
                 trans_->setTransformType(last_transform_type_);
                 detector_array_[0]->localSearch = false;
+                mancalibrate_ = false;
+                printf("manualCalib done\n");
             }
 
             calib_step_++;
@@ -163,12 +181,17 @@ void CWhycon::manualCalib()
   [0,0] is left-top, [0,field_length_] next in clockwise direction*/
 void CWhycon::autoCalib()
 {
+    int ok_last_tracks = 0;
     for(int i = 0; i < num_markers_; i++)
     {
-        if(!detector_array_[i]->lastTrackOK)
+        if(detector_array_[i]->lastTrackOK)
         {
-            return;
+            ++ok_last_tracks;
         }
+    }
+    if(ok_last_tracks < 4)
+    {
+        return;
     }
 
     int index[] = {0, 0, 0, 0};
@@ -189,7 +212,7 @@ void CWhycon::autoCalib()
             }
         }
     }
-    std::printf("INDEX: %i %i %i %i\n", index[0], index[1], index[2], index[3]);
+    printf("INDEX: %i %i %i %i\n", index[0], index[1], index[2], index[3]);
 
     for(int i = 0; i < 4; i++)
     {
@@ -216,6 +239,7 @@ void CWhycon::autoCalib()
         num_markers_ = was_markers_;
         trans_->setTransformType(last_transform_type_);
         autocalibrate_ = false;
+        printf("autoCalib done\n");
     }
 }
 
@@ -282,7 +306,7 @@ void CWhycon::processImage(CRawImage *image, std::vector<SMarker> &whycon_detect
     // draw stuff on the GUI
     if(use_gui_)
     {
-        image->drawTimeStats(eval_time_, num_markers_);
+        image->drawTimeStats(eval_time_, num_found_);
 
         if(mancalibrate_)
         {
@@ -299,7 +323,7 @@ void CWhycon::processImage(CRawImage *image, std::vector<SMarker> &whycon_detect
     }
 
     // establishing the coordinate system by manual or autocalibration
-    if (autocalibrate_ && num_found_ == num_markers_)
+    if (autocalibrate_ && num_found_ > 3) //num_found_ == num_markers_)
     {
         autoCalib();
     }

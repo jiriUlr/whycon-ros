@@ -12,8 +12,18 @@
 namespace whycon_ros
 {
 
+bool CWhyconROSNode::getGuiSettingsCallback(whycon::GetGuiSettings::Request &req, whycon::GetGuiSettings::Response &res)
+{
+    ROS_INFO("getGuiSettingsCallback");
+    res.draw_coords = whycon_.getDrawCoords();
+    res.draw_segments = whycon_.getDrawSegments();
+    res.coords = whycon_.getCoordinates();
+    return true;
+}
+
 bool CWhyconROSNode::setDrawingCallback(whycon::SetDrawing::Request &req, whycon::SetDrawing::Response &res)
 {
+    ROS_INFO("setDrawingCallback coords %d segs %d", req.draw_coords, req.draw_segments);
     whycon_.setDrawing(req.draw_coords, req.draw_segments);
     res.success = true;
     return true;
@@ -21,6 +31,7 @@ bool CWhyconROSNode::setDrawingCallback(whycon::SetDrawing::Request &req, whycon
 
 bool CWhyconROSNode::setCoordsCallback(whycon::SetCoords::Request &req, whycon::SetCoords::Response &res)
 {
+    ROS_INFO("setCoordsCallback %d", req.coords);
     try
     {
         whycon_.setCoordinates(static_cast<whycon::ETransformType>(req.coords));
@@ -36,6 +47,7 @@ bool CWhyconROSNode::setCoordsCallback(whycon::SetCoords::Request &req, whycon::
 
 bool CWhyconROSNode::setCalibMethodCallback(whycon::SetCalibMethod::Request &req, whycon::SetCalibMethod::Response &res)
 {
+    ROS_INFO("setCalibMethodCallback %d", req.method);
     try
     {
         if(req.method == 0)
@@ -64,14 +76,15 @@ bool CWhyconROSNode::setCalibMethodCallback(whycon::SetCalibMethod::Request &req
 
 bool CWhyconROSNode::setCalibPathCallback(whycon::SetCalibPath::Request &req, whycon::SetCalibPath::Response &res)
 {
+    ROS_INFO("setCalibPathCallback action %s path %s", req.action.c_str(), req.path.c_str());
     try
     {
-        if(req.action.compare("load"))
+        if(req.action == "load")
         {
             whycon_.loadCalibration(req.path);
             res.success = true;
         }
-        else if(req.action.compare("save"))
+        else if(req.action == "save")
         {
             whycon_.saveCalibration(req.path);
             res.success = true;
@@ -92,6 +105,7 @@ bool CWhyconROSNode::setCalibPathCallback(whycon::SetCalibPath::Request &req, wh
 
 bool CWhyconROSNode::selectMarkerCallback(whycon::SelectMarker::Request &req, whycon::SelectMarker::Response &res)
 {
+    ROS_INFO("selectMarkerCallback x %f y %f", req.point.x, req.point.y);
     whycon_.selectMarker(req.point.x, req.point.y);
     return true;
 }
@@ -301,6 +315,7 @@ CWhyconROSNode::CWhyconROSNode()
     calib_method_srv_ = nh.advertiseService("set_calib_method", &CWhyconROSNode::setCalibMethodCallback, this);
     calib_path_srv_ = nh.advertiseService("set_calib_path", &CWhyconROSNode::setCalibPathCallback, this);
     select_marker_srv_ = nh.advertiseService("select_marker", &CWhyconROSNode::selectMarkerCallback, this);
+    gui_settings_srv_ = nh.advertiseService("get_gui_settings", &CWhyconROSNode::getGuiSettingsCallback, this);
 
     // create dynamic reconfigure server
     dyn_srv_cb_ = boost::bind(&CWhyconROSNode::reconfigureCallback, this, _1, _2);

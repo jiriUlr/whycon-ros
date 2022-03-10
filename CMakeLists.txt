@@ -15,7 +15,7 @@ find_package(OpenCV REQUIRED)
 
 generate_dynamic_reconfigure_options(cfg/whycon.cfg)
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -O2 -ggdb")
+add_compile_options(-std=c++11 -O3 -ggdb)
 
 #######################################
 ## Declare ROS messages and services ##
@@ -36,6 +36,7 @@ add_service_files(
     SetCalibPath.srv
     SetCoords.srv
     SetDrawing.srv
+    GetGuiSettings.srv
 )
 
 ## Generate added messages and services with any dependencies listed here

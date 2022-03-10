@@ -76,13 +76,16 @@ void CRawImage::drawStats(SMarker &marker, bool trans_2D)
     cv::putText(img, text, text_pos0, font_face, font_scale, color, thickness, cv::LINE_AA);
 
     if(trans_2D)
-        std::sprintf(text, "%02i %03i", marker.seg.ID, (int)(marker.obj.yaw / M_PI * 180));
+    {
+        // std::sprintf(text, "%02i %03i", marker.seg.ID, (int)(marker.obj.yaw / M_PI * 180));
+    }
     else
+    {
         std::sprintf(text, "%02i %.3f %.3f %.3f", marker.seg.ID, marker.obj.roll, marker.obj.pitch, marker.obj.yaw);
-
-    cv::Size text_size1 = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
-    cv::Point text_pos1(marker.seg.minx - 30, marker.seg.maxy + 2 * text_size1.height + 5);
-    cv::putText(img, text, text_pos1, font_face, font_scale, color, thickness, cv::LINE_AA);
+        cv::Size text_size1 = cv::getTextSize(text, font_face, font_scale, thickness, &baseline);
+        cv::Point text_pos1(marker.seg.minx - 30, marker.seg.maxy + 2 * text_size1.height + 5);
+        cv::putText(img, text, text_pos1, font_face, font_scale, color, thickness, cv::LINE_AA);
+    }
 }
 
 void CRawImage::drawGuideCalibration(int calib_num, float dim_x, float dim_y)
@@ -92,7 +95,7 @@ void CRawImage::drawGuideCalibration(int calib_num, float dim_x, float dim_y)
 
     int font_face = cv::FONT_HERSHEY_SIMPLEX;
     double font_scale = 1;
-    int thickness = 1;
+    int thickness = 2;
     int baseline = 0;
     cv::Scalar text_color(0, 255, 0);
     cv::Scalar rect_color(0, 0, 0);
@@ -101,16 +104,16 @@ void CRawImage::drawGuideCalibration(int calib_num, float dim_x, float dim_y)
     {
         default:
         case 0:
-            std::sprintf(text, "Click the marker at the [0.000, 0.000].");
+            std::sprintf(text, "Click at [0.000, 0.000].");
             break;
         case 1:
-            std::sprintf(text, "Click the marker at the [%.3f, 0.000].", dim_x);
+            std::sprintf(text, "Click at [%.3f, 0.000].", dim_x);
             break;
         case 2:
-            std::sprintf(text, "Click the marker at the [0.000, %.3f].", dim_y);
+            std::sprintf(text, "Click at [0.000, %.3f].", dim_y);
             break;
         case 3:
-            std::sprintf(text, "Click the marker at the [%.3f, %.3f].", dim_x, dim_y);
+            std::sprintf(text, "Click at [%.3f, %.3f].", dim_x, dim_y);
             break;
     }
 

@@ -53,6 +53,9 @@ class CWhycon {
         void updateConfiguration(bool id, float diam, int markers, int size, double fl, double fw, double ict, double fct, double art, double cdtr, double cdta);
         void updateCameraInfo(std::vector<float> &intrinsic_mat, std::vector<float> &distortion_coeffs);
         void processImage(CRawImage *image, std::vector<SMarker> &whycon_detections);
+        bool getDrawCoords();
+        bool getDrawSegments();
+        int getCoordinates();
 
     private:
 
