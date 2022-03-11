@@ -342,9 +342,9 @@ CWhycon::~CWhycon()
 }
 
 CWhycon::CWhycon() :
-    draw_coords_(true),
-    draw_segments_(false),
-    calibrated_coords_(false)
+    draw_coords_(true)
+    , draw_segments_(false)
+    , calibrated_coords_(false)
 {
 }
 

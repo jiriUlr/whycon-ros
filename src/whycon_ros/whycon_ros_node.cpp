@@ -273,7 +273,9 @@ void CWhyconROSNode::start()
     }
 }
 
-CWhyconROSNode::CWhyconROSNode()
+CWhyconROSNode::CWhyconROSNode() :
+    intrinsic_mat_(9)
+    , distortion_coeffs_(5)
 {
     ros::NodeHandle nh("~");        // ROS node handle
     
@@ -281,8 +283,8 @@ CWhyconROSNode::CWhyconROSNode()
     int id_samples;                 // num of samples to identify ID
     int hamming_dist;               // hamming distance of ID code
     int num_markers;                // initial number of markers
-    int default_width = 640;
-    int default_height = 480;
+    std::string calib_path;
+    int coords_method;
 
     // obtain parameters
     nh.param("use_gui", use_gui_, true);
@@ -293,9 +295,11 @@ CWhyconROSNode::CWhyconROSNode()
     nh.param("id_samples", id_samples, 360);
     nh.param("hamming_dist", hamming_dist, 1);
     nh.param("num_markers", num_markers, 10);
+    nh.param("calib_file", calib_path, std::string(""));
+    nh.param("coords_method", coords_method, 0);
 
-    intrinsic_mat_.resize(9);
-    distortion_coeffs_.resize(5);
+    int default_width = 640;
+    int default_height = 480;
     image_ = new whycon::CRawImage(default_width, default_height, 3);
     whycon_.init(circle_diameter_, use_gui_, id_bits, id_samples, hamming_dist, num_markers, default_width, default_height);
     
@@ -320,6 +324,23 @@ CWhyconROSNode::CWhyconROSNode()
     // create dynamic reconfigure server
     dyn_srv_cb_ = boost::bind(&CWhyconROSNode::reconfigureCallback, this, _1, _2);
     dyn_srv_.setCallback(dyn_srv_cb_);
+
+    if(calib_path.size() > 0)
+    {
+        try
+        {
+            whycon_.loadCalibration(calib_path);
+            whycon_.setCoordinates(static_cast<whycon::ETransformType>(coords_method));
+        }
+        catch(const std::exception& e)
+        {
+            ROS_WARN("Calibration file '%s' could not be loaded. Using camera centric coordinates.", calib_path.c_str());
+        }
+    }
+    else
+    {
+        ROS_INFO("Calibration file path empty. Using camera centric coordinates.");
+    }
 }
 
 CWhyconROSNode::~CWhyconROSNode()
