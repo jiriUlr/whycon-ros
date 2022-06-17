@@ -57,7 +57,7 @@ class CCircleDetect {
         // adjust the dimensions of the image, when the image size changes
         void adjustDimensions(int wi, int he);
 
-        void ambiguityAndObtainCode(CRawImage *image);
+        bool ambiguityAndObtainCode(CRawImage *image);
         void ambiguityPlain();
         void setDraw(bool draw);
 

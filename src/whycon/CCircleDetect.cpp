@@ -531,10 +531,15 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
     {
         ellipse_centers = trans_->calcSolutions(outer);
         
-        if(identify)
-            ambiguityAndObtainCode(image);
-        else
+        if(identify) {
+            if(!ambiguityAndObtainCode(image))
+            {
+                outer.valid = false;
+            }
+        }
+        else {
             ambiguityPlain();
+        }
 
         trans_->calcOrientation(tracked_object);
         trans_->transformCoordinates(tracked_object);
@@ -594,7 +599,7 @@ SMarker CCircleDetect::findSegment(CRawImage* image, SSegment init)
     return output;
 }
 
-void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
+bool CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
 {
     int segIdx = 0;
 
@@ -639,6 +644,10 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         {
             x[i][a] = tmp[i].x+(tmp[i].m0*cos((float)a/idSamples*2*M_PI)*tmp[i].v0+tmp[i].m1*sin((float)a/idSamples*2*M_PI)*tmp[i].v1)*2.0;
             y[i][a] = tmp[i].y+(tmp[i].m0*cos((float)a/idSamples*2*M_PI)*tmp[i].v1-tmp[i].m1*sin((float)a/idSamples*2*M_PI)*tmp[i].v0)*2.0;
+            if(x[i][a] < 0 || image->width_ <= x[i][a] || y[i][a] < 0 || image->height_ <= y[i][a])
+            {
+                return false;
+            }
         }
 
         //retrieve the image brightness on these using bilinear transformation
@@ -765,11 +774,20 @@ void CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         pos = ((int)x[segIdx][a] + ((int)y[segIdx][a]) * image->width_);
         if (pos > 0 && pos < image->width_ * image->height_)
         {
-            image->data_[step * pos + 0] = 0;
-            image->data_[step * pos + 1] = (unsigned char)(255.0 * a / idSamples);
-            image->data_[step * pos + 2] = 0;
+            if(image->bpp_ == 3)
+            {
+                image->data_[step * pos + 0] = 0;
+                image->data_[step * pos + 1] = (unsigned char)(255.0 * a / idSamples);
+                image->data_[step * pos + 2] = 0;
+            }
+            else if(image->bpp_ == 1)
+            {
+                image->data_[step * pos] = (unsigned char)(255.0 * a / idSamples);
+            }
         }
     }
+
+    return true;
 }
 
 void CCircleDetect::ambiguityPlain()
