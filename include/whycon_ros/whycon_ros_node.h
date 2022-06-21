@@ -60,6 +60,8 @@ class CWhyconROSNode
         ros::Publisher markers_pub_;            // publisher of MarkerArray
         ros::Publisher visual_pub_;             // publisher of MarkerArray for RVIZ
 
+        ros::Publisher model_state_pub_;
+
         bool draw_coords_;
         ros::ServiceServer drawing_srv_;
         ros::ServiceServer calib_path_srv_;

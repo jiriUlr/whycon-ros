@@ -9,6 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
     message_generation
     dynamic_reconfigure
     tf2_ros
+    gazebo_msgs
     )
 
 find_package(OpenCV REQUIRED)
@@ -58,7 +59,7 @@ catkin_package(
     #  INCLUDE_DIRS include
     #  LIBRARIES charging
     #  CATKIN_DEPENDS image_transport roscpp rospy std_msgs
-    CATKIN_DEPENDS roscpp image_transport message_runtime geometry_msgs visualization_msgs dynamic_reconfigure tf
+    CATKIN_DEPENDS roscpp image_transport message_runtime geometry_msgs visualization_msgs dynamic_reconfigure tf gazebo_msgs
     #  DEPENDS system_lib
     )
 

@@ -25,6 +25,7 @@
   <depend>message_generation</depend>
   <depend>visualization_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>gazebo_msgs</depend>
 
   <exec_depend>message_runtime</exec_depend>
 

@@ -7,6 +7,8 @@
 #include <visualization_msgs/MarkerArray.h>
 #include "whycon/MarkerArray.h"
 #include "whycon/Marker.h"
+#include <gazebo_msgs/ModelStates.h>
+#include <geometry_msgs/Pose.h>
 
 
 namespace whycon_ros
@@ -170,6 +172,8 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
     // Generate RVIZ visualization marker
     visualization_msgs::MarkerArray visual_array;
 
+    gazebo_msgs::ModelStates model_states;
+
     for(const whycon::SMarker &detection : whycon_detections_)
     {
         whycon::Marker marker;
@@ -192,6 +196,9 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
         marker.rotation.y = detection.obj.pitch;
         marker.rotation.z = detection.obj.yaw;
         marker_array.markers.push_back(marker);
+
+        model_states.name.push_back(std::to_string(marker.id));
+        model_states.pose.push_back(marker.position);
 
         if(identify_ && publish_tf_)
         {
@@ -248,6 +255,8 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
     {
         markers_pub_.publish(marker_array);
 
+        model_state_pub_.publish(model_states);
+
         if(publish_visual_)
             visual_pub_.publish(visual_array);
 
@@ -269,7 +278,7 @@ void CWhyconROSNode::start()
     while(ros::ok())
     {
         ros::spinOnce();
-        usleep(30000);
+        usleep(10000);
     }
 }
 
@@ -312,6 +321,8 @@ CWhyconROSNode::CWhyconROSNode() :
     img_pub_ = it.advertise("processed_image", 1);
     markers_pub_ = nh.advertise<whycon::MarkerArray>("markers", 1);
     visual_pub_ = nh.advertise<visualization_msgs::MarkerArray>("visualisation", 1);
+
+    model_state_pub_ = nh.advertise<gazebo_msgs::ModelStates>("turtle_states", 1);
 
     // advertise services
     drawing_srv_ = nh.advertiseService("set_drawing", &CWhyconROSNode::setDrawingCallback, this);
