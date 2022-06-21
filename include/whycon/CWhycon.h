@@ -3,7 +3,8 @@
 
 #include <vector>
 #include <deque>
-
+#include <map>
+#include <array>
 #include <stdlib.h>
 #include <string>
 #include <cmath>
@@ -75,7 +76,8 @@ class CWhycon {
         bool calibrated_coords_;
 
 
-
+        std::array<std::map<int, int>, 4> indices_autocalib;
+        int index_autocalib[4];
 
         // variables related to (auto) calibration
         const int calibration_steps_ = 20;              // how many measurements to average to estimate calibration pattern position (manual calib)

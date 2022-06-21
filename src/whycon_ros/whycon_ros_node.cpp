@@ -115,23 +115,23 @@ bool CWhyconROSNode::selectMarkerCallback(whycon::SelectMarker::Request &req, wh
 void CWhyconROSNode::reconfigureCallback(whycon::whyconConfig& config, uint32_t level)
 {
     ROS_INFO("[Reconfigure Request]\n"
-        "identify %s circleDiameter %lf numMarkers %d\n"
-        "minSize %d fieldLength %lf fieldWidth %lf\n"
-        "initialCircularityTolerance %lf finalCircularityTolerance %lf\n"
-        "areaRatioTolerance %lf\n"
-        "centerDistanceToleranceRatio %lf centerDistanceToleranceAbs %lf\n",
+        "identify %s circle_diameter %lf num_markers %d\n"
+        "min_size %d field_length %lf field_width %lf\n"
+        "initial_circularity_tolerance %lf final_circularity_tolerance %lf\n"
+        "area_ratio_tolerance %lf\n"
+        "center_distance_tolerance_ratio %lf center_distance_tolerance_abs %lf\n",
         (config.identify) ? "True" : "False",
-        config.circleDiameter, config.numMarkers, config.minSize, config.fieldLength,
-        config.fieldWidth, config.initialCircularityTolerance,
-        config.finalCircularityTolerance, config.areaRatioTolerance,
-        config.centerDistanceToleranceRatio, config.centerDistanceToleranceAbs
+        config.circle_diameter, config.num_markers, config.min_size, config.field_length,
+        config.field_width, config.initial_circularity_tolerance,
+        config.final_circularity_tolerance, config.area_ratio_tolerance,
+        config.center_distance_tolerance_ratio, config.center_distance_tolerance_abs
         );
 
     whycon_.updateConfiguration(
-        config.identify, config.circleDiameter, config.numMarkers, config.minSize,
-        config.fieldLength, config.fieldWidth, config.initialCircularityTolerance,
-        config.finalCircularityTolerance, config.areaRatioTolerance,
-        config.centerDistanceToleranceRatio, config.centerDistanceToleranceAbs
+        config.identify, config.circle_diameter, config.num_markers, config.min_size,
+        config.field_length, config.field_width, config.initial_circularity_tolerance,
+        config.final_circularity_tolerance, config.area_ratio_tolerance,
+        config.center_distance_tolerance_ratio, config.center_distance_tolerance_abs
         );
 
     identify_ = config.identify;
@@ -299,7 +299,7 @@ CWhyconROSNode::CWhyconROSNode() :
     nh.param("use_gui", use_gui_, true);
     nh.param("pub_visual", publish_visual_, false);
     nh.param("pub_tf", publish_tf_, false);
-    nh.param("circle_diam", circle_diameter_, 0.122);
+    nh.param("circle_diameter", circle_diameter_, 0.122);
     nh.param("id_bits", id_bits, 6);
     nh.param("id_samples", id_samples, 360);
     nh.param("hamming_dist", hamming_dist, 1);

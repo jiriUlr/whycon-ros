@@ -179,8 +179,73 @@ void CWhycon::manualCalib()
 
 /*finds four outermost circles and uses them to set-up the coordinate system
   [0,0] is left-top, [0,field_length_] next in clockwise direction*/
+// void CWhycon::autoCalib()
+// {
+//     int ok_last_tracks = 0;
+//     for(int i = 0; i < num_markers_; i++)
+//     {
+//         if(detector_array_[i]->lastTrackOK)
+//         {
+//             ++ok_last_tracks;
+//         }
+//     }
+//     if(ok_last_tracks < 4)
+//     {
+//         return;
+//     }
+
+//     int index[] = {0, 0, 0, 0};
+//     int max_eval = 0;
+//     int eval = 0;
+//     int sX[] = {-1, +1, -1, +1};
+//     int sY[] = {+1, +1, -1, -1};
+//     for(int b = 0; b < 4; b++)
+//     {
+//         max_eval = -10000000;
+//         for(int i = 0; i < num_markers_; i++)
+//         {
+//             eval =  sX[b] * current_marker_array_[i].seg.x + sY[b] * current_marker_array_[i].seg.y;
+//             if(eval > max_eval)
+//             {
+//                 max_eval = eval;
+//                 index[b] = i;
+//             }
+//         }
+//     }
+//     printf("INDEX: %i %i %i %i\n", index[0], index[1], index[2], index[3]);
+
+//     for(int i = 0; i < 4; i++)
+//     {
+//         if (calib_step_ <= auto_calibration_pre_steps_)
+//         {
+//             calib_[i].x = calib_[i].y = calib_[i].z = 0;
+//         }
+//         calib_[i].x += current_marker_array_[index[i]].obj.x;
+//         calib_[i].y += current_marker_array_[index[i]].obj.y;
+//         calib_[i].z += current_marker_array_[index[i]].obj.z;
+//     }
+//     calib_step_++;
+//     if (calib_step_ == auto_calibration_steps_)
+//     {
+//         for(int i = 0; i < 4; i++)
+//         {
+//             calib_[i].x = calib_[i].x / (auto_calibration_steps_ - auto_calibration_pre_steps_);
+//             calib_[i].y = calib_[i].y / (auto_calibration_steps_ - auto_calibration_pre_steps_);
+//             calib_[i].z = calib_[i].z / (auto_calibration_steps_ - auto_calibration_pre_steps_);
+//         }
+//         trans_->calibrate2D(calib_, field_length_, field_width_);
+//         trans_->calibrate3D(calib_, field_length_, field_width_);
+//         calib_num_++;
+//         num_markers_ = was_markers_;
+//         trans_->setTransformType(last_transform_type_);
+//         autocalibrate_ = false;
+//         printf("autoCalib done\n");
+//     }
+// }
+
 void CWhycon::autoCalib()
 {
+    printf("autocalib start point. step %d\n", calib_step_);
     int ok_last_tracks = 0;
     for(int i = 0; i < num_markers_; i++)
     {
@@ -194,53 +259,74 @@ void CWhycon::autoCalib()
         return;
     }
 
-    int index[] = {0, 0, 0, 0};
-    int max_eval = 0;
-    int eval = 0;
-    int sX[] = {-1, +1, -1, +1};
-    int sY[] = {+1, +1, -1, -1};
-    for(int b = 0; b < 4; b++)
+    if(calib_step_ < auto_calibration_pre_steps_)
     {
-        max_eval = -10000000;
-        for(int i = 0; i < num_markers_; i++)
+        int max_eval = 0;
+        int eval = 0;
+        int sX[] = {-1, +1, -1, +1};
+        int sY[] = {+1, +1, -1, -1};
+        for(int b = 0; b < 4; b++)
         {
-            eval =  sX[b] * current_marker_array_[i].seg.x + sY[b] * current_marker_array_[i].seg.y;
-            if(eval > max_eval)
+            max_eval = -10000000;
+            int best_index = 0;
+            for(int i = 0; i < num_markers_; i++)
             {
-                max_eval = eval;
-                index[b] = i;
+                if(current_marker_array_[i].valid)
+                {
+                    eval =  sX[b] * current_marker_array_[i].seg.x + sY[b] * current_marker_array_[i].seg.y;
+                    if(eval > max_eval)
+                    {
+                        max_eval = eval;
+                        best_index = i;
+                        // fprintf(stderr, "indices tested b %d i %d eval %d max_eval %d\n", b, i, eval, max_eval);
+                    }
+                }
             }
+            ++indices_autocalib[b][best_index];
         }
     }
-    printf("INDEX: %i %i %i %i\n", index[0], index[1], index[2], index[3]);
-
-    for(int i = 0; i < 4; i++)
+    else if(calib_step_ == auto_calibration_pre_steps_)
     {
-        if (calib_step_ <= auto_calibration_pre_steps_)
+        // printf("index extraction\n");
+        for(int i = 0; i < 4; ++i)
         {
+            // for(auto p : indices_autocalib[i])
+            //     printf("%d ---- %d %d\n", i, p.first, p.second);
+            index_autocalib[i] = (*std::max_element(indices_autocalib[i].begin(), indices_autocalib[i].end(),
+                [] (const std::pair<int, int>& a, const std::pair<int, int>& b) { return a.second < b.second; } )).first;
+
             calib_[i].x = calib_[i].y = calib_[i].z = 0;
         }
-        calib_[i].x += current_marker_array_[index[i]].obj.x;
-        calib_[i].y += current_marker_array_[index[i]].obj.y;
-        calib_[i].z += current_marker_array_[index[i]].obj.z;
+        printf("INDEX: %i %i %i %i\n", index_autocalib[0], index_autocalib[1], index_autocalib[2], index_autocalib[3]);
     }
-    calib_step_++;
-    if (calib_step_ == auto_calibration_steps_)
+    else if(calib_step_ > auto_calibration_pre_steps_)
     {
         for(int i = 0; i < 4; i++)
         {
-            calib_[i].x = calib_[i].x / (auto_calibration_steps_ - auto_calibration_pre_steps_);
-            calib_[i].y = calib_[i].y / (auto_calibration_steps_ - auto_calibration_pre_steps_);
-            calib_[i].z = calib_[i].z / (auto_calibration_steps_ - auto_calibration_pre_steps_);
+            calib_[i].x += current_marker_array_[index_autocalib[i]].obj.x;
+            calib_[i].y += current_marker_array_[index_autocalib[i]].obj.y;
+            calib_[i].z += current_marker_array_[index_autocalib[i]].obj.z;
         }
-        trans_->calibrate2D(calib_, field_length_, field_width_);
-        trans_->calibrate3D(calib_, field_length_, field_width_);
-        calib_num_++;
-        num_markers_ = was_markers_;
-        trans_->setTransformType(last_transform_type_);
-        autocalibrate_ = false;
-        printf("autoCalib done\n");
+        if (calib_step_ == auto_calibration_steps_)
+        {
+            for(int i = 0; i < 4; i++)
+            {
+                calib_[i].x = calib_[i].x / (auto_calibration_steps_ - auto_calibration_pre_steps_);
+                calib_[i].y = calib_[i].y / (auto_calibration_steps_ - auto_calibration_pre_steps_);
+                calib_[i].z = calib_[i].z / (auto_calibration_steps_ - auto_calibration_pre_steps_);
+                // printf("i %d -- %f %f %f\n", i, calib_[i].x, calib_[i].y, calib_[i].z);
+            }
+            trans_->calibrate2D(calib_, field_length_, field_width_);
+            // trans_->calibrate2D(calib_, homo_square_pts_);
+            trans_->calibrate3D(calib_, field_length_, field_width_);
+            calib_num_++;
+            // num_markers_ = was_markers_;
+            trans_->setTransformType(last_transform_type_);
+            autocalibrate_ = false;
+            printf("autoCalib done\n");
+        }
     }
+    ++calib_step_;
 }
 
 void CWhycon::processImage(CRawImage *image, std::vector<SMarker> &whycon_detections)
