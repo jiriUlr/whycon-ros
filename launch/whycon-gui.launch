@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+
+  <arg name="perspective_file"   default="$(find whycon)/launch/turtle-exp.perspective"    doc="Perspective file for rqt_gui"/>
+
+  <node pkg="rqt_gui" type="rqt_gui" name="rqt_gui_whycon" output="screen" args="--perspective-file $(arg perspective_file)" launch-prefix=""/>
+
+</launch>
