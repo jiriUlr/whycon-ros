@@ -16,9 +16,9 @@
   <arg name="pub_visual"    default="false"  doc="Whether to publish visualization markers"/>
   <arg name="use_gui"       default="true"   doc="Whether to use GUI"/>
   
-  <arg name="calib_file"    default=""
+  <arg name="calib_file"    default="$(find whycon)/launch/arena-calibration.yaml"
                             doc="Default localition for the custom coordinates calibration file to load on start up"/>
-  <arg name="coords_method" default=""
+  <arg name="coords_method" default="1"
                             doc="Default coordinates using the calib_path file to apply on start up. 0 - none, 1 - 2D, 2 - 3D"/>
 
   <node pkg="whycon" type="whycon" name="whycon" output="screen" launch-prefix="">
@@ -35,6 +35,10 @@
     <param name="use_gui"           value="$(arg use_gui)"/>
     <param name="calib_file"        value="$(arg calib_file)"/>
     <param name="coords_method"     value="$(arg coords_method)"/>
+
+    <param name="field_width"       value="3.1246"/>
+    <param name="field_length"      value="3.8024"/>
+    <param name="min_size"          value="200"/>
   </node>
 
 </launch>
