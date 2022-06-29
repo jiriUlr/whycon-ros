@@ -10,7 +10,7 @@
   <arg name="id_bits"       default="2"      doc="Number of encoded bits"/>
   <arg name="id_samples"    default="720"    doc="Number of samples to detect ID"/>
   <arg name="hamming_dist"  default="1"      doc="Hamming distance used for ID"/>
-  <arg name="num_markers"   default="4"      doc="Initial number of markers to detect"/>
+  <arg name="num_markers"   default="1"      doc="Initial number of markers to detect"/>
 
   <arg name="pub_tf"        default="false"  doc="Whether to publish transformations from camera to marker frame"/>
   <arg name="pub_visual"    default="false"  doc="Whether to publish visualization markers"/>
