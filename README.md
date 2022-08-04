@@ -36,21 +36,25 @@ If you decide to use this software for your research, please cite <i>WhyCon</i> 
 #### Quick setup for initial testing
 
 0. Have ROS Noetic and appropriate camera driver installed. Also have a <a href="http://wiki.ros.org/camera_calibration/Tutorials/MonocularCalibration">calibrated camera</a> with distortion model "plumb bob".
-1. Check the required <a href="#dependencies">libraries</a>
-2. Download the code from GitHub into a catkin workspace.
-3. Compile the code - just type `catkin_make` in workspace directory.
-4. Source setup script in package directory into shell enviroment e.g. `source devel/setup.bash`
-5. Download, resize and print one circular <a href="id/test.pdf">pattern</a> - you have the pattern also in the <i>id/test.pdf</i> file.
-6. Run code by <i>roslaunch</i> and remap subsribed camera topics either on start up through arguments
+0. Make sure your camera is running, e.g., run <i>roslaunch</i> usb_cam_test.launch of the usb_cam package:
 ```
-roslaunch whycon whycon.launch cam_info:=<camera_info_topic> cam_raw:=<camera_image_raw_topic>
+roslaunch usb_cam usb_cam-test.launch
+``` 
+0. Check the required <a href="#dependencies">libraries</a>
+0. Download the code from GitHub into a catkin workspace.
+0. Compile the code - just type `catkin_make` in workspace directory.
+0. Source setup script in package directory into shell enviroment e.g. `source devel/setup.bash`
+0. Download, resize and print one circular <a href="id/test.pdf">pattern</a> - you have the pattern also in the <i>id/test.pdf</i> file.
+0. Run code by <i>roslaunch</i> and remap subsribed camera topics either on start up through arguments, e.g.,
+```
+roslaunch whycon whycon-test.launch cam_info:=/usb_cam/camera_info cam_raw:=/usb_cam/image_raw
 ```
 or rewrite file <a href="launch/whycon.launch">whycon.launch</a> so default values of tags <i>arg</i> called <i>cam_info</i> and <i>cam_raw</i> will match topics <i>camera_info</i> and <i>image_raw</i>. Then it's just
 ```
-roslaunch whycon whycon.launch
+roslaunch whycon whycon-test.launch
 ```
-7. If using patterns with encoded ID keep the option <i>identify</i> turned on in <i>rqt_reconfigure</i> and if without ID, then turn it off!!!
-9. You can dynamically change the parameters in <i>rqt_reconfigure</i>.
+0. If using patterns with encoded ID keep the option <i>identify</i> turned on in <i>rqt_reconfigure</i> and if without ID, then turn it off!!!
+0. You can dynamically change the parameters in <i>rqt_reconfigure</i>.
 
 #### Generating tags with ID
 
