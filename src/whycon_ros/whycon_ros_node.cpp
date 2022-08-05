@@ -229,9 +229,9 @@ void CWhyconROSNode::imageCallback(const sensor_msgs::Image::ConstPtr &msg)
             visual_marker.pose.orientation.z = detection.obj.qz;
             visual_marker.pose.orientation.w = detection.obj.qw;
 
-            visual_marker.scale.x = 0.2;//circleDiameter;  // meters
-            visual_marker.scale.y = 0.2;//circleDiameter;
-            visual_marker.scale.z = 0.01;
+            visual_marker.scale.x = 0.01;//circleDiameter;  // meters
+            visual_marker.scale.y = circle_diameter_;//circleDiameter;
+            visual_marker.scale.z = circle_diameter_;
             visual_marker.color.r = 0.0;
             visual_marker.color.g = 1.0;
             visual_marker.color.b = 0.0;

@@ -596,15 +596,18 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
 
     float qx3, qy3, qz3, qw3;
     hamilton_product(qx2, qy2, qz2, qw2, qx1, qy1, qz1, qw1, qx3, qy3, qz3, qw3);
-    // std::printf("q3 %f %f %f %f norm %f\n", qx3, qy3, qz3, qw3, quaternion_norm(qx3, qy3, qz3, qw3));
     normalize_quaternion(qx3, qy3, qz3, qw3);
+
+    hamilton_product(qx3, qy3, qz3, qw3, 0.0, 0.0, 1.0, 0.0, qx1, qy1, qz1, qw1);
+    // std::printf("q3 %f %f %f %f norm %f\n", qx3, qy3, qz3, qw3, quaternion_norm(qx3, qy3, qz3, qw3));
+    normalize_quaternion(qx1, qy1, qz1, qw1);
 
     // std::printf("\n");
     
-    obj.qx = qx3;
-    obj.qy = qy3;
-    obj.qz = qz3;
-    obj.qw = qw3;
+    obj.qx = qx1;
+    obj.qy = qy1;
+    obj.qz = qz1;
+    obj.qw = qw1;
 }
 
 /* Hamilton product of two quaternions. Q1 is then the resulting quaternion */
