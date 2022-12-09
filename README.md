@@ -18,7 +18,8 @@ The main contributors were [Matias Nitsche](https://scholar.google.co.uk/citatio
 
 | WhyCon version  | Application | Main features | Maintainer|
 | --------------- | ----------- | ------ | ----- |
-| [WhyCon-orig](../../) | general | 2D, 3D, ROS, lightweight, autocalibration | [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao)|
+| [WhyCon/WhyCode](https://github.com/jiriUlr/whycon-ros) | general | **actively maintained**, ROS | [Jiri Ulrich](https://scholar.google.com/citations?user=vMtZ5FcAAAAJ&hl=cs&oi=ao) |
+| [WhyCon-orig](https://github.com/gestom/whycon-orig) | general | 2D, 3D, ROS, lightweight, autocalibration | [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao)|
 | [WhyCon-ROS](https://github.com/lrse/whycon) | general | 2D, ROS | [Matias Nitsche](https://scholar.google.co.uk/citations?user=Z0hQoRUAAAAJ&hl=en&oi=ao) |
 | [SwarmCon](https://github.com/gestom/CosPhi/tree/master/Localization) | μ-swarms | 2D, individual IDs, autocalibration | [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) |
 | [Caspa-WhyCon](http://robotics.fel.cvut.cz/faigl/caspa/) | UAVs | embedded, open HW-SW solution | [Jan Faigl](https://scholar.google.co.uk/citations?user=-finD_sAAAAJ&hl=en) |
@@ -118,6 +119,7 @@ roslaunch whycon whycon.launch [...] id_bits:=...
 
 ### Acknowledgements
 
-The development of this work is currently supported by the Czech Science Foundation project 17-27006Y _STRoLL_.
+The development of this work is currently supported by the EU FET Open programme under grant agreement No.964492 project _RoboRoyale_.
+The development of this work was supported by the Czech Science Foundation project 17-27006Y _STRoLL_.
 In the past, the work was supported by EU within its Seventh Framework Programme project ICT-600623 _STRANDS_.
 The Czech Republic and Argentina have given support through projects 7AMB12AR022, ARC/11/11 and 13-18316P.
