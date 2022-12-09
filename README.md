@@ -110,7 +110,10 @@ roslaunch whycon whycon.launch [...] id_bits:=...
 - ROS basic packages (see <a href="package.xml">package.xml</a>)
 
 ### References
-1. J. Ulrich, A. Alsayed et al.: <b>Towards fast fiducial marker with full 6 DOF pose estimation</b>. Symposium on Applied Computing, 2022.
+1. J. Ulrich, A. Alsayed et al.: **[Towards fast fiducial marker with full 6 DOF pose estimation](https://dl.acm.org/doi/abs/10.1145/3477314.3507043)**. Symposium on Applied Computing, 2022. [[bibtex](https://gist.github.com/jiriUlr/7d333e90c43e6b41c79e5150c7a59267)].
+1. J. Ulrich: **[Fiducial marker-based multiple camera localisation system](https://dspace.cvut.cz/bitstream/handle/10467/101526/F3-DP-2022-Ulrich-Jiri-main.pdf?sequence=-1&isAllowed=y)**. Master's thesis. Czech Technical University in Prague, 2022. [[bibtex](https://gist.github.com/jiriUlr/e8d53c7edd6b14c824e67e60596a489f)].
+3. K. Zampachu: **[Visual analysis of beehive queen behaviour](https://dspace.cvut.cz/bitstream/handle/10467/101048/F3-BP-2022-Zampachu-Kristi-main.pdf?sequence=-1&isAllowed=y)**. Bachelor's thesis. Czech Technical University in Prague, 2022. [[bibtex](https://gist.github.com/jiriUlr/eb08ee4b183c615e312ab2db767e9b18)].
+1. J. Ulrich: **[Fiducial Marker Detection for Vision-Based Mobile Robot Localisation](https://dspace.cvut.cz/bitstream/handle/10467/89879/F3-BP-2020-Ulrich-Jiri-main.pdf?sequence=-1&isAllowed=y)**. Bachelor's thesis. Czech Technical University in Prague, 2020. [[bibtex](https://gist.github.com/jiriUlr/348d42b7a1cdd08b94953adedc50c5d7)].
 1. T. Krajník, M. Nitsche et al.: <b>A Practical Multirobot Localization System</b>. Journal of Intelligent and Robotic Systems (JINT), 2014.
 1. P. Lightbody, T. Krajník et al.: <b>An Efficient Visual Fiducial Localisation System</b>. Applied Computing Review, 2017.
 1. T. Krajník, M. Nitsche et al.: <b>External localization system for mobile robotics</b>. International Conference on Advanced Robotics (ICAR), 2013.
