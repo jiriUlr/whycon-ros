@@ -251,6 +251,9 @@ SDecoded CNecklace::decode(char *code, char *realCode, int maxIndex, float segme
     //segmentAngle = 2*M_PI*(-(float)maxIndex/idSamples+(float)result.rotation/length)+atan2(segmentV1,segmentV0)+1.5*M_PI/length;
     float segmentAngle = 2*M_PI*(-(float)maxIndex/idSamples-(float)edgeIndex/length/2.0+(float)result.rotation/length)+atan2(segmentV1,segmentV0);//+1.5*M_PI/length;
     
+    // compensation of the segmentWidth / 2 addition to maxIndex
+    segmentAngle += 2 * M_PI * (idSamples / length / 2.0) / 2.0 / idSamples;
+
     while (segmentAngle > +M_PI) segmentAngle -= 2 * M_PI;
     while (segmentAngle < -M_PI) segmentAngle += 2 * M_PI;
 

@@ -582,7 +582,7 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
     // final_norm[1] = rot_y;
     // final_norm[2] = rot_z;
 
-    float new_angle = obj.angle + 0.2;
+    float new_angle = obj.angle;
     if(new_angle > M_PI)
         new_angle = new_angle - 2 * M_PI;
     // std::printf("angle %f new angle %f\n", obj.angle, new_angle);
