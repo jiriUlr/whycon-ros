@@ -436,9 +436,9 @@ SEllipseCenters CTransformation::calcEigen(const float *data)
                    t2  ~  z -> x
                   -t0  ~ -x -> y
                   -t1  ~ -y -> z */
-            result.t[idx][0] = t2;
-            result.t[idx][1] = -t0;
-            result.t[idx][2] = -t1;
+            result.t[idx][0] = t0;
+            result.t[idx][1] = t1;
+            result.t[idx][2] = t2;
 
             reTransformXY(t0, t1, t2);
             result.u[idx] = t0;
@@ -539,10 +539,10 @@ void CTransformation::calcOrientation(STrackedObject &obj)
 // https://en.wikipedia.org/wiki/Quaternion#Hamilton_product
 void CTransformation::calcQuaternion(STrackedObject &obj)
 {
-    // cv::Vec3f initial_norm(0.0, 0.0, 1.0);
-    // cv::Vec3f final_norm(obj.n0, obj.n1, obj.n2);
-    cv::Vec3f initial_norm(1.0, 0.0, 0.0);
-    cv::Vec3f final_norm(obj.n2, -obj.n0, -obj.n1);
+    cv::Vec3f initial_norm(0.0, 0.0, 1.0);
+    cv::Vec3f final_norm(obj.n0, obj.n1, obj.n2);
+    // cv::Vec3f initial_norm(1.0, 0.0, 0.0);
+    // cv::Vec3f final_norm(obj.n2, -obj.n0, -obj.n1);
     cv::normalize(final_norm, final_norm);
 
     cv::Vec3f axis_vec = final_norm.cross(initial_norm);
@@ -567,21 +567,6 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
     // std::printf("q1 %f %f %f %f norm %f\n", qx1, qy1, qz1, qw1, quaternion_norm(qx1, qy1, qz1, qw1));
     normalize_quaternion(qx1, qy1, qz1, qw1);
 
-    // NOT USED
-    // float qx1c, qy1c, qz1c, qw1c;
-    // conjugate_quaternion(qx1, qy1, qz1, qw1, qx1c, qy1c, qz1c, qw1c);
-    // float tmp_qx, tmp_qy, tmp_qz, tmp_qw;
-    // hamilton_product(qx1, qy1, qz1, qw1, final_norm[0], final_norm[1], final_norm[2], 0.0, tmp_qx, tmp_qy, tmp_qz, tmp_qw);
-    // std::printf("qt %f %f %f %f norm %f\n", tmp_qx, tmp_qy, tmp_qz, tmp_qw, quaternion_norm(tmp_qx, tmp_qy, tmp_qz, tmp_qw));
-    // normalize_quaternion(tmp_qx, tmp_qy, tmp_qz, tmp_qw);
-    // float rot_x, rot_y, rot_z, rot_w;
-    // hamilton_product(tmp_qx, tmp_qy, tmp_qz, tmp_qw, qx1c, qy1c, qz1c, qw1c, rot_x, rot_y, rot_z, rot_w);
-    // std::printf("norm_surf_q %f %f %f %f norm %f\n", rot_x, rot_y, rot_z, rot_w, quaternion_norm(rot_x, rot_y, rot_z, rot_w));
-    // normalize_quaternion(rot_x, rot_y, rot_z, rot_w);
-    // final_norm[0] = rot_x;
-    // final_norm[1] = rot_y;
-    // final_norm[2] = rot_z;
-
     float new_angle = obj.angle;
     if(new_angle > M_PI)
         new_angle = new_angle - 2 * M_PI;
@@ -598,7 +583,8 @@ void CTransformation::calcQuaternion(STrackedObject &obj)
     hamilton_product(qx2, qy2, qz2, qw2, qx1, qy1, qz1, qw1, qx3, qy3, qz3, qw3);
     normalize_quaternion(qx3, qy3, qz3, qw3);
 
-    hamilton_product(qx3, qy3, qz3, qw3, 0.0, 0.0, 1.0, 0.0, qx1, qy1, qz1, qw1);
+    hamilton_product(qx3, qy3, qz3, qw3, 1.0, 0.0, 0.0, 0.0, qx1, qy1, qz1, qw1);
+    // hamilton_product(qx3, qy3, qz3, qw3, 0.0, 0.0, 1.0, 0.0, qx1, qy1, qz1, qw1);
     // std::printf("q3 %f %f %f %f norm %f\n", qx3, qy3, qz3, qw3, quaternion_norm(qx3, qy3, qz3, qw3));
     normalize_quaternion(qx1, qy1, qz1, qw1);
 
