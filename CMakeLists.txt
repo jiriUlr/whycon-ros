@@ -15,7 +15,7 @@ find_package(OpenCV REQUIRED)
 
 generate_dynamic_reconfigure_options(cfg/whycon.cfg)
 
-add_compile_options(-std=c++11 -O3 -ggdb)
+add_compile_options(-std=c++11 -O2 -g)
 
 #######################################
 ## Declare ROS messages and services ##

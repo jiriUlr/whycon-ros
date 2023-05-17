@@ -738,7 +738,7 @@ bool CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         segIdx = 0;
     else
         segIdx = 1;
-    // printf("solution %d\n\n", segIdx);
+    // fprintf(stderr, "solution %d var %f %f\n\n", segIdx, variance[0], variance[1]);
 
     tracked_object.u = ellipse_centers.u[segIdx];
     tracked_object.v = ellipse_centers.v[segIdx];
@@ -758,6 +758,11 @@ bool CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
     outer.ID = segment_decode.id + 1;
     tracked_object.angle = segment_decode.angle;
 
+    if (outer.ID == 0){
+        outer.valid = false;
+        return true;
+    }
+
     if (debug)
     {
         printf("CODE %i %i %.3f\n", segment_decode.id, maxIndex, segment_decode.angle);
@@ -768,6 +773,7 @@ bool CCircleDetect::ambiguityAndObtainCode(CRawImage *image)
         for (int a = 0; a < idSamples; a++) printf("%.2f ", smooth[segIdx][a]);
         printf("\n");
     }
+
 
     for (int a = 0; a < idSamples; a++)
     {

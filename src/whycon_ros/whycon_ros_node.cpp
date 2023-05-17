@@ -269,7 +269,7 @@ void CWhyconROSNode::start()
     while(ros::ok())
     {
         ros::spinOnce();
-        usleep(10000);
+        usleep(30000);
     }
 }
 

@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <launch>
 
-  <node pkg="rqt_reconfigure" type="rqt_reconfigure" name="reconfigurator"/>
+  <!--node pkg="rqt_reconfigure" type="rqt_reconfigure" name="reconfigurator"/-->
   
-  <arg name="cam_info"  default="/camera/camera_info"  doc="camera_info topic"/>
-  <arg name="cam_raw"   default="/camera/image_raw"    doc="image_raw topic"/>
+  <arg name="cam_info"  default="/usb_cam_logi_gray/camera_info"  doc="camera_info topic"/>
+  <arg name="cam_raw"   default="/usb_cam_logi_gray/image_raw"    doc="image_raw topic"/>
 
-  <arg name="circle_diameter" default="0.2"    doc="Outer circle diameter in meters"/>
-  <arg name="id_bits"         default="8"      doc="Number of encoded bits"/>
+  <arg name="circle_diameter" default="0.15"    doc="Outer circle diameter in meters"/>
+  <arg name="id_bits"         default="5"      doc="Number of encoded bits"/>
   <arg name="id_samples"      default="720"    doc="Number of samples to detect ID"/>
   <arg name="hamming_dist"    default="1"      doc="Hamming distance used for ID"/>
   <arg name="num_markers"     default="1"      doc="Initial number of markers to detect"/>
@@ -35,6 +35,8 @@
     <param name="use_gui"         value="$(arg use_gui)"/>
     <param name="calib_file"      value="$(arg calib_file)"/>
     <param name="coords_method"   value="$(arg coords_method)"/>
+
+    <param name="min_size" value="1000" />
   </node>
 
 </launch>
