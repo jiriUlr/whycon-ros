@@ -101,7 +101,7 @@ roslaunch whycon whycon.launch [...] id_bits:=...
 2. We have tried to comment the code so an experienced programmer should be able to alter the system accordingly. However, if you have any questions regarding the code, feel free to contact [Tom Krajnik](http://scholar.google.co.uk/citations?user=Qv3nqgsAAAAJ&hl=en&oi=ao) or [Jiří Ulrich](https://scholar.google.com/citations?user=vMtZ5FcAAAAJ&hl=cs&oi=ao)
 3. If you use this localization system for your research, please don't forget to cite at least one relevant paper below.
 
-## License
+### License
 The code is avaiable only for academic, educational, research, and non-profit useage. In any other case or when You are not sure, please, contact us!
 
 ### <a name="dependencies">Dependencies</a>
