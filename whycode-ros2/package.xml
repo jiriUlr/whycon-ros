@@ -1,33 +1,36 @@
-<package format="2">
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
 
-  <name>whycon</name>
-  <version>0.7.5</version>
-  <description>Implementats the WhyCon localisation system into ROS.</description>
+  <name>whycode</name>
+  <version>0.0.1</version>
+  <description>WhyCode localisation system</description>
 
-  <maintainer email="jiri.ulrich@fel.cvut.cz">Jiri Ulrich</maintainer>
+  <maintainer email="ulricji1@fel.cvut.cz">Jiří Ulrich</maintainer>
+  <author email="ulricji1@fel.cvut.cz">Jiří Ulrich</author>
+  <author email="krajnt1@fel.cvut.cz">Tomáš Krajník</author>
 
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>Custom. Please contact us.</license>
+  <license file="LICENSE">CUSTOM LICENSE FILE</license>
 
-  <url type="website">https://github.com/gestom/whycon-orig</url>
+  <url>https://github.com/jiriUlr/whycon-ros</url>
 
-  <author email="tomas.krajnik@fel.cvut.cz">Tom Krajnik</author>
-  <author email="jiri.ulrich@fel.cvut.cz">Jiri Ulrich</author>
-
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake_ros</buildtool_depend>
   
-  <depend>roscpp</depend>
+  <depend>rclcpp</depend>
+  <depend>std_msgs</depend>
   <depend>sensor_msgs</depend>
-  <depend>tf</depend>
-  <depend>image_transport</depend>
-  <depend>dynamic_reconfigure</depend>
-  <depend>message_generation</depend>
-  <depend>visualization_msgs</depend>
   <depend>geometry_msgs</depend>
+  <depend>image_transport</depend>
+  <depend>whycode_interfaces</depend>
 
+  <depend>opencv</depend>
+
+  <build_depend>rosidl_default_generators</build_depend>
+  <exec_depend>rosidl_default_runtime</exec_depend>
+  
   <exec_depend>message_runtime</exec_depend>
 
   <export>
+    <build_type>ament_cmake</build_type>
   </export>
 </package>
