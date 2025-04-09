@@ -1,6 +1,0 @@
----
-bool draw_coords  # draw/hide coordinates
-bool draw_segments  # draw/hide segmentation outcome
-int8 coords  # 0 = camera coords
-             # 1 = 2D coords
-             # 2 = 3D coords

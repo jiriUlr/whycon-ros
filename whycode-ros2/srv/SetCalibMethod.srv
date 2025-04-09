@@ -1,5 +1,0 @@
-int8 method  # 0 = autocalibration
-             # 1 = manual calibration
----
-bool success  # bool feedback
-string msg  # information message

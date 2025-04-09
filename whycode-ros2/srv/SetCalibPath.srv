@@ -1,5 +1,0 @@
-string action  # either "save" or "load"
-string path  # path to yaml file
----
-bool success  # bool feedback
-string msg  # information message
