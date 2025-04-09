@@ -102,7 +102,7 @@ roslaunch whycon whycon.launch [...] id_bits:=...
 3. If you use this localization system for your research, please don't forget to cite at least one relevant paper below.
 
 ### License
-The code is avaiable only for academic, educational, research, and non-profit useage. In any other case or when You are not sure, please, contact us!
+Please, see the <a href="LICENSE">LICENSE</a> file.
 
 ### <a name="dependencies">Dependencies</a>
 

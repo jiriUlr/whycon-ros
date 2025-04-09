@@ -6,9 +6,7 @@
 
   <maintainer email="jiri.ulrich@fel.cvut.cz">Jiri Ulrich</maintainer>
 
-  <!-- Commonly used license strings: -->
-  <!--   BSD, MIT, Boost Software License, GPLv2, GPLv3, LGPLv2.1, LGPLv3 -->
-  <license>Custom. Please contact us.</license>
+  <license>CUSTOM LICENSE FILE</license>
 
   <url type="website">https://github.com/gestom/whycon-orig</url>
 
