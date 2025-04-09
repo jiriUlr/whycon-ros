@@ -6,7 +6,6 @@
 #include <rclcpp/rclcpp.hpp>
 #include <image_transport/image_transport.hpp>
 
-#include <std_msgs/msg/float32.hpp>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
 #include <sensor_msgs/msg/image.hpp>
@@ -61,7 +60,6 @@ class CWhyconROSNode : public rclcpp::Node
 
         rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr      cam_info_sub_;
         rclcpp::Publisher<whycode_interfaces::msg::MarkerArray>::SharedPtr markers_pub_;
-        rclcpp::Publisher<std_msgs::msg::Float32>::SharedPtr               distance_pub_;
 
         image_transport::Subscriber img_sub_;
         image_transport::Publisher  img_pub_;
